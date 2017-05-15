@@ -6,7 +6,10 @@
 
 
 // Our variables
-$base-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+$heading: 'ff-prater-serif-web', serif;
+$body: 'ubuntu-condensed', sans-serif;
+$base-font-family: $heading;
 $base-font-size:   16px;
 $base-font-weight: 400;
 $small-font-size:  $base-font-size * 0.875;
@@ -14,9 +17,15 @@ $base-line-height: 1.5;
 
 $spacing-unit:     30px;
 
+$red: #EE3F54;
+$blue: #2EBDE5;
+$teal: #59B5B1;
+$yellow: #F6E15F;
+$purple: #62469A;
+
 $text-color:       #111;
 $background-color: #fdfdfd;
-$brand-color:      #2a7ae2;
+$brand-color:      $red;
 
 $grey-color:       #828282;
 $grey-color-light: lighten($grey-color, 40%);
@@ -49,5 +58,8 @@ $on-laptop:        800px;
 @import
         "base",
         "layout",
-        "syntax-highlighting"
+        "syntax-highlighting",
+        "logo",
+        "chicago",
+        "shuffle"
 ;

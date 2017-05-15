@@ -2,12 +2,30 @@
  * Site header
  */
 .site-header {
-    border-top: 5px solid $grey-color-dark;
-    border-bottom: 1px solid $grey-color-light;
+    //border-top: 5px solid $grey-color-dark;
+    background: $red;
     min-height: 56px;
 
     // Positioning context for the mobile navigation icon
     position: relative;
+    &-sub {
+        &_wrap {background: $grey-color-dark;}
+        display: flex;
+        justify-content: space-between;
+        max-width: $content-width - $spacing-unit * 2;
+        padding-right: $spacing-unit;
+        padding-left: $spacing-unit;
+        margin: 0 auto;
+        h4 {
+            margin: 5px 0;
+            color: $background-color;
+        }
+        @include media-query($on-laptop) {
+            max-width: $content-width - $spacing-unit;
+            padding-right: $spacing-unit / 2;
+            padding-left: $spacing-unit / 2;
+        }
+    }
 }
 
 .site-title {
@@ -99,6 +117,7 @@
  */
 .site-footer {
     border-top: 1px solid $grey-color-light;
+    background: $red;
     padding: $spacing-unit 0;
 }
 
