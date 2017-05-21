@@ -4,12 +4,12 @@ var artist = [];
 
 artist[0] = {
     name:  ["Chance The Rapper"],
-    audio: ["/src/audio/horse.mp3"],
+    audio: ["/src/audio/chance-the-rapper.mp3"],
     date:  ["Sat 8/05"]
 };
 artist[1] = {
     name:  ["The Killers"],
-    audio: ["/src/audio/horse.mp3"],
+    audio: ["/src/audio/the-killers.mp3"],
     date:  ["Fri 8/04"]
 };
 
@@ -19,7 +19,20 @@ var spinner = anime({
     duration: 3000
 });
 
+// Timer to change song after x seconds
+var timer = setInterval(function() { 
+    nextSong(); 
+}, 30000);
+
 $('.shuffle-next').on('click',function(){ 
+    clearInterval(timer);
+    timer = setInterval(function() { 
+        nextSong(); 
+    }, 30000);
+    nextSong();
+});
+
+function nextSong() {
     spinner.restart();
     
     var rand = Math.floor(Math.random() * artist.length);
@@ -32,7 +45,7 @@ $('.shuffle-next').on('click',function(){
     $(".shuffle-date h4").html(date);
     var sourceMp3=document.getElementById('audio');
     sourceMp3.src= audio;
-});
+}
 
 // Audio control
 $('.sound-icon').on('click', function() {
