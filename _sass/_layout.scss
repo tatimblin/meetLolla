@@ -26,6 +26,19 @@
             padding-left: $spacing-unit / 2;
         }
     }
+    &-top {
+        position: relative;
+        &-control {
+            position: absolute;
+            height: 100%;
+            top:0; right:-19px;
+            padding: 0 0 0 12px;
+            border-left: 1px solid $background-color;
+            svg {
+                padding: 15px 0;
+            }
+        }
+    }
 }
 
 .site-title {
@@ -63,10 +76,10 @@
     @include media-query($on-palm) {
         position: absolute;
         top: 9px;
-        right: $spacing-unit / 2;
-        background-color: $background-color;
-        border: 1px solid $grey-color-light;
-        border-radius: 5px;
+        right: $spacing-unit / 2 + 60;
+        background-color: $yellow;
+        //border: 1px solid $background-color;
+        //border-radius: 2px;
         text-align: right;
 
         .menu-icon {
@@ -83,7 +96,7 @@
                 height: 15px;
 
                 path {
-                    fill: $grey-color-dark;
+                    fill: $purple;
                 }
             }
         }
@@ -187,7 +200,7 @@
  * Page content
  */
 .page-content {
-    padding: $spacing-unit 0;
+    padding: $spacing-unit 0 0 0;
 }
 
 .page-heading {
