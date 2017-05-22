@@ -91,13 +91,13 @@ var artist = [];
 
 artist[0] = {
     name:  ["Chance The Rapper"],
-    audio: ["/src/audio/chance-the-rapper.mp3"],
+    audio: ["src/audio/chance-the-rapper.mp3"],
     link:  ["https://www.youtube.com/watch?v=DVkkYlQNmbc"],
     date:  ["Sat 8/05"]
 };
 artist[1] = {
     name:  ["The Killers"],
-    audio: ["/src/audio/the-killers.mp3"],
+    audio: ["src/audio/the-killers.mp3"],
     link:  ["https://www.youtube.com/watch?v=gGdGFtwCNBE"],
     date:  ["Fri 8/04"]
 };
