@@ -32,7 +32,17 @@
             transform: translateY(-50px);
             animation: next-nudge-sm 5s ease infinite;
         }
-        animation: next-nudge 5s ease infinite;
+        //animation: next-nudge 5s ease infinite;
+        animation: spin-progress 30s ease-out infinite;
+    }
+}
+
+@keyframes spin-progress {
+    0% {
+        transform: translateY(-90px) rotate(0deg);
+    }
+    100% {
+        transform: translateY(-90px) rotate(-360deg);
     }
 }
 

@@ -1,0 +1,60 @@
+#example {
+    background-color: #212121;
+    color: #F2F2F2;
+    font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+    font-size: small;
+	//height: 550px;
+}
+
+#example a {
+    text-decoration: none;
+    color: #007ed6;
+}
+
+#example p {
+    margin: 2px;
+}
+
+#example img {
+	border: none;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-o-box-shadow: none;
+	-ms-box-shadow: none;
+}
+
+#example audio {
+    width: 100%;
+}
+
+#example .showIfNoApi {
+    display: none;
+}
+
+#example #visualisation {
+    position: relative;
+    height: 0px;
+    display: flex;
+    justify-content: space-around;
+    bottom: 0;
+}
+
+#example #visualisation > div {
+    position: absolute;
+    width: 2%;
+    background-color: #ffe0bd;
+    
+	bottom: 0px;
+	&:before {
+		position: absolute;
+		width:70px; height:70px;
+		transform: translateY(-70px) translateX(-12px);
+		content: '';
+		background-image: url('https://s-media-cache-ak0.pinimg.com/originals/5f/59/f7/5f59f72729df8e49b2964d234e375efb.png');
+		background-size: contain;
+		background-position: top left;
+		background-repeat:no-repeat;
+		
+	}
+}
