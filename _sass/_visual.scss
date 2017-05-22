@@ -42,16 +42,16 @@
 
 #example #visualisation > div {
     position: absolute;
-    width: 2%;
-    background-color: #ffe0bd;
+    width: 14px;
+    background-color: #EC9683;
     
 	bottom: 0px;
 	&:before {
 		position: absolute;
 		width:70px; height:70px;
-		transform: translateY(-70px) translateX(-12px);
+		transform: translateY(-68px) translateX(-27px);
 		content: '';
-		background-image: url('https://s-media-cache-ak0.pinimg.com/originals/5f/59/f7/5f59f72729df8e49b2964d234e375efb.png');
+		background-image: url('../../src/img/hand1.svg');
 		background-size: contain;
 		background-position: top left;
 		background-repeat:no-repeat;

@@ -14,6 +14,7 @@
         }
     }
     &-artist {
+        position: relative;
         h1 {
             text-align: center;
             font-size: 7em;
@@ -21,6 +22,16 @@
                 margin: 10px $spacing-unit / 2;
                 font-size: 5em;
                 line-height: 1em;
+            }
+        }
+        &-link {
+            position: absolute;
+            max-width: $content-width;
+            bottom:-$spacing-unit/2;
+            right: 0; left: 0;
+            margin: auto;
+            a {
+                float: right;
             }
         }
     }

@@ -92,11 +92,13 @@ var artist = [];
 artist[0] = {
     name:  ["Chance The Rapper"],
     audio: ["/src/audio/chance-the-rapper.mp3"],
+    link:  ["https://www.youtube.com/watch?v=DVkkYlQNmbc"],
     date:  ["Sat 8/05"]
 };
 artist[1] = {
     name:  ["The Killers"],
     audio: ["/src/audio/the-killers.mp3"],
+    link:  ["https://www.youtube.com/watch?v=gGdGFtwCNBE"],
     date:  ["Fri 8/04"]
 };
 
@@ -126,12 +128,14 @@ function nextSong() {
     
 	var name  = artist[rand].name[0];
 	var audio = artist[rand].audio[0];
+    var link = artist[rand].link[0];
     var date  = artist[rand].date[0];
 	
     $(".shuffle-artist h1").html(name);
-    $(".shuffle-date h4").html(date);
     var sourceMp3=document.getElementById('audio');
     sourceMp3.src= audio;
+    document.getElementById('sourceHref').href=link;
+    $(".shuffle-date h4").html(date);
 }
 
 // Audio control
