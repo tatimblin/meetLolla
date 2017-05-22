@@ -1,0 +1,60 @@
+#example {
+    background-color: #212121;
+    color: #F2F2F2;
+    font-family: 'Myriad Pro', Calibri, Helvetica, Arial, sans-serif;
+    font-size: small;
+	//height: 550px;
+}
+
+#example a {
+    text-decoration: none;
+    color: #007ed6;
+}
+
+#example p {
+    margin: 2px;
+}
+
+#example img {
+	border: none;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	-o-box-shadow: none;
+	-ms-box-shadow: none;
+}
+
+#example audio {
+    width: 100%;
+}
+
+#example .showIfNoApi {
+    display: none;
+}
+
+#example #visualisation {
+    position: relative;
+    height: 0px;
+    display: flex;
+    justify-content: space-around;
+    bottom: 0;
+}
+
+#example #visualisation > div {
+    position: absolute;
+    width: 14px;
+    background-color: #EC9683;
+    
+	bottom: 0px;
+	&:before {
+		position: absolute;
+		width:70px; height:70px;
+		transform: translateY(-68px) translateX(-27px);
+		content: '';
+		background-image: url('../../src/img/hand1.svg');
+		background-size: contain;
+		background-position: top left;
+		background-repeat:no-repeat;
+		
+	}
+}

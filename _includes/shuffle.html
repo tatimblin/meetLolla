@@ -1,0 +1,37 @@
+<div class="shuffle">
+    <div class="shuffle-date">
+        <h4>Sat 8/05</h4>
+    </div>
+    <div class="shuffle-artist">
+        <h1>Chance The Rapper</h1>
+        <div class="shuffle-artist-link">
+            <a id="sourceHref" href="" target="_blank">Listen To More</a>
+        </div>
+    </div>
+    <div class="shuffle-next">
+        {% include next.html %}
+    </div>
+    <div class="shuffle-audio">
+        <audio id="audio" autoplay>
+            <source src="src/audio/chance-the-rapper.mp3" type="audio/mpeg">
+            Your browser does not support the audio tag.
+        </audio>
+    </div>
+</div>
+
+
+
+
+<!--
+            {% if page.categories contains "thurs" %}
+                Thurs 8/03
+            {% endif %}
+            {% if page.categories contains "fri" %}
+                Fri 8/04
+            {% endif %}
+            {% if page.categories contains "sat" %}
+                Sat 8/05
+            {% endif %}
+            {% if page.categories contains "sun" %}
+                Sun 8/06
+            {% endif %}-->

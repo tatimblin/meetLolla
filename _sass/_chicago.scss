@@ -1,0 +1,21 @@
+.chicago {
+    position: relative;
+    //width: $content-width;
+    svg {
+        display: block;
+        max-width: $content-width * .8;
+        width: 90%;
+        margin: 0 auto;
+        #front {
+            
+        }
+        #mid {
+            
+        }
+        #back {
+            
+        }
+        opacity:0;
+        animation: fade-up 600ms 400ms ease-out forwards 1;
+    }
+}
