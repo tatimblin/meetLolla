@@ -1,7 +1,15 @@
 <footer class="site-footer">
 
     <div class="site-footer-content">
-        CONTENT
+        <div class="site-footer-content-item site-footer-content-credit">
+                {% include svg/play-btn.html %}
+                <div class="site-footer-content-credit_inner">
+                    <p>Site By <a href="http://timblin.co/">Tristan Timblin</a>. 2017</p>
+                </div>
+        </div>
+        <div class="site-footer-content-item site-footer-content-share">
+            {% include icon-twitter.html username=site.twitter_username %}
+        </div>
     </div>
 
 </footer>
