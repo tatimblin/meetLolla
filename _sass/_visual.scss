@@ -57,4 +57,52 @@
 		background-repeat:no-repeat;
 		
 	}
+    &:nth-child(3), &:nth-child(19) {
+        background-color: #C66E34;
+        &:before {
+            width:60px;
+            transform: translateY(-60px) translateX(-24px);
+            background-image: url('../../src/img/hand2.svg');
+        }
+    }
+    &:nth-child(4), &:nth-child(10), &:nth-child(18) {
+        background-color: #E3937C;
+        &:before {
+            width:150px;
+            transform: translateY(-70px) translateX(-32px);
+            background-image: url('../../src/img/hand3.svg');
+        }
+    }
+    &:nth-child(1), &:nth-child(5), &:nth-child(13) {
+        background-color: #F6BA98;
+        &:before {
+            width:100px;
+            transform: translateY(-70px) translateX(-25px);
+            background-image: url('../../src/img/hand4.svg');
+        }
+    }
+    &:nth-child(6), &:nth-child(16) {
+        background-color: #C66E34;
+        &:before {
+            width:100px;
+            transform: translateY(-70px) translateX(-25px);
+            background-image: url('../../src/img/hand5.svg');
+        }
+    }
+    &:nth-child(7), &:nth-child(14) {
+        background-color: #C66E34;
+        &:before {
+            width:100px;
+            transform: translateY(-70px) translateX(-33px);
+            background-image: url('../../src/img/hand6.svg');
+        }
+    }
+    &:nth-child(8), &:nth-child(12), &:nth-child(17) {
+        background-color: #E3937C;
+        &:before {
+            width:60px;
+            transform: translateY(-60px) translateX(-24px);
+            background-image: url('../../src/img/hand7.svg');
+        }
+    }
 }

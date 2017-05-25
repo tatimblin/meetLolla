@@ -1,5 +1,7 @@
 .shuffle {
+    position: relative;
     margin: 100px 0;
+    z-index: 100;
     &-date {
         max-width: $content-width;
         margin: 0 auto;
@@ -43,8 +45,8 @@
             transform: translateY(-50px);
             animation: next-nudge-sm 5s ease infinite;
         }
-        //animation: next-nudge 5s ease infinite;
-        animation: spin-progress 30s ease-out infinite;
+        animation: next-nudge 5s ease infinite;
+        //animation: spin-progress 30s ease-out infinite;
     }
 }
 
