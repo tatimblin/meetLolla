@@ -416,25 +416,25 @@ artist[53] = {
 artist[54] = {
     name:  ["London Grammar"],
     audio: ["src/audio/london-grammar.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=oVQqmH4ufCQ"],
     date:  ["Sun 8/06"]
 };
 artist[55] = {
     name:  ["Rag'N'Bone Man"],
     audio: ["src/audio/rag-n-bone-man.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=L3wKzyIN1yk"],
     date:  ["Sun 8/06"]
 };
 artist[56] = {
     name:  ["Andrew McMahon"],
     audio: ["src/audio/andrew-mcmahon.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=e5ZUfzJoG1E"],
     date:  ["Fri 8/04"]
 };
 artist[57] = {
     name:  ["NoName"],
     audio: ["src/audio/noname.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=pUncXbXAiV0"],
     date:  ["Sun 8/06"]
 };
 artist[58] = {
@@ -446,263 +446,699 @@ artist[58] = {
 artist[59] = {
     name:  ["Joey Bada$$"],
     audio: ["src/audio/joey-badass.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=TeQW-9Cg8qs"],
     date:  ["Sun 8/06"]
 };
 artist[60] = {
     name:  ["Kaytranada"],
     audio: ["src/audio/kaytranada.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=rKlA5tRu6f0"],
     date:  ["Thurs 8/03"]
 };
 artist[61] = {
     name:  ["Charli XCX"],
     audio: ["src/audio/charli-xcx.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=ABhDiXbUaBE"],
     date:  ["Sun 8/06"]
 };
 artist[62] = {
     name:  ["Car Seat Headrest"],
     audio: ["src/audio/car-sea-headrest.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=s_a1hPwXiWw"],
     date:  ["Sun 8/06"]
 };
 artist[63] = {
     name:  ["Slander"],
     audio: ["src/audio/slander.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=sjkxT6lTPnk"],
     date:  ["Sun 8/06"]
 };
 artist[64] = {
     name:  ["Getter"],
     audio: ["src/audio/getter.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=2YllipGl2Is"],
     date:  ["Fri 8/04"]
 };
 artist[65] = {
     name:  ["Nghtmre"],
     audio: ["src/audio/nghtmre.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=N5oTnEJxMac"],
     date:  ["Sat 8/05"]
 };
 artist[66] = {
     name:  ["Machine Gun Kelly"],
     audio: ["src/audio/machine-gun-kelly.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=tgvbhxb9yk8"],
     date:  ["Sun 8/06"]
 };
 artist[67] = {
     name:  ["The Pretty Reckless"],
     audio: ["src/audio/the-pretty-reckless.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=BQpZv2r8fb4"],
     date:  ["Fri 8/04"]
 };
 artist[68] = {
     name:  ["Warpaint"],
     audio: ["src/audio/warpaint.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=gg_OThhfXh0"],
     date:  ["Sat 8/05"]
 };
 artist[69] = {
     name:  ["Baauer"],
     audio: ["src/audio/baauer.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=gxApr8QnlGY"],
     date:  ["Thurs 8/03"]
 };
 artist[70] = {
     name:  ["Highly Suspect"],
     audio: ["src/audio/highly-suspect.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=l5-gja10qkw"],
     date:  ["Sat 8/05"]
 };
 artist[71] = {
     name:  ["Zara Larsson"],
     audio: ["src/audio/zara-larsson.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=lbZ7BG1adGI"],
     date:  ["Sat 8/05"]
 };
 artist[72] = {
     name:  ["Slushii"],
     audio: ["src/audio/slushii.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=Cst692tmseQ"],
     date:  ["Fri 8/04"]
 };
 artist[73] = {
     name:  ["The Drums"],
     audio: ["src/audio/the-drums.mp3"],
-    link:  [""],
-    date:  [""]
+    link:  ["https://www.youtube.com/watch?v=yo7xVdUXj5I"],
+    date:  ["Thurs 8/03"]
 };
 artist[74] = {
     name:  ["A-Trak"],
     audio: ["src/audio/a-trak.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Thurs 8/03"]
 };
 artist[75] = {
     name:  ["6lack"],
     audio: ["src/audio/6lack.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sun 8/06"]
 };
 artist[76] = {
     name:  ["Cloud Nothings"],
     audio: ["src/audio/cloud-nothings.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[77] = {
     name:  ["Tritonal"],
     audio: ["src/audio/tritonal.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Thurs 8/03"]
 };
 artist[78] = {
     name:  ["Sampha"],
     audio: ["src/audio/sampha.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sun 8/06"]
 };
 artist[79] = {
     name:  ["Jai Wolf"],
     audio: ["src/audio/jai-wolf.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
 artist[80] = {
     name:  ["Ephwurd"],
     audio: ["src/audio/ephwurd.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
 artist[81] = {
     name:  ["Alvvays"],
     audio: ["src/audio/alvvays.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
 artist[82] = {
     name:  ["Maggie Rogers"],
     audio: ["src/audio/maggie-rogers.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sun 8/06"]
 };
 artist[83] = {
     name:  ["Jidenna"],
     audio: ["src/audio/jidenna.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[84] = {
     name:  ["Mura Masa"],
     audio: ["src/audio/mura-masa.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[85] = {
     name:  ["NF"],
     audio: ["src/audio/nf.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sun 8/06"]
 };
 artist[86] = {
     name:  ["Gryffin"],
     audio: ["src/audio/gryffin.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Thurs 8/03"]
 };
 artist[87] = {
     name:  ["Joyryde"],
     audio: ["src/audio/joyryde.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sun 8/06"]
 };
 artist[88] = {
     name:  ["CRX"],
     audio: ["src/audio/.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Thurs 8/03"]
 };
 artist[89] = {
     name:  ["Temples"],
     audio: ["src/audio/temples.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Thurs 8/03"]
 };
 artist[90] = {
     name:  ["G Jones"],
     audio: ["src/audio/g-jones.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
 artist[91] = {
     name:  ["$uicideboy$"],
     audio: ["src/audio/suicideboys.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Thurs 8/03"]
 };
 artist[92] = {
     name:  ["Bishop Briggs"],
     audio: ["src/audio/bishop-briggs.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[93] = {
     name:  ["Amine"],
     audio: ["src/audio/amine.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
 artist[94] = {
     name:  ["Ookay"],
     audio: ["src/audio/ookay.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[95] = {
     name:  ["The Districts"],
     audio: ["src/audio/the-districts.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[96] = {
     name:  ["San Fermin"],
     audio: ["src/audio/san-fermin.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
 artist[97] = {
     name:  ["Joseph"],
     audio: ["src/audio/joseph.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sun 8/06"]
 };
 artist[98] = {
     name:  ["Pup"],
     audio: ["src/audio/pup.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/04"]
 };
 artist[99] = {
     name:  ["Moose Blood"],
     audio: ["src/audio/moose-blood.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Fri 8/05"]
 };
 artist[100] = {
     name:  ["The Japanese House"],
     audio: ["src/audio/the-japanese-house.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
-// End of base lineup
-artist[83] = {
-    name:  [""],
-    audio: ["src/audio/.mp3"],
+artist[101] = {
+    name:  ["Leon"],
+    audio: ["src/audio/leon.mp3"],
     link:  [""],
-    date:  [""]
+    date:  ["Sat 8/05"]
 };
-
+artist[103] = {
+    name:  ["Hippo Campus"],
+    audio: ["src/audio/hippo-campus.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[104] = {
+    name:  ["Honne"],
+    audio: ["src/audio/honne.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[105] = {
+    name:  ["MadeinTYO"],
+    audio: ["src/audio/madeintyo.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[106] = {
+    name:  ["Cheat Codes"],
+    audio: ["src/audio/cheat-codes.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[107] = {
+    name:  ["Kevin Devine"],
+    audio: ["src/audio/kevin-devine.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[108] = {
+    name:  ["Paper Diamond"],
+    audio: ["src/audio/paper-diamond.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[109] = {
+    name:  ["Skott"],
+    audio: ["src/audio/skott.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[110] = {
+    name:  ["The Lemon Twigs"],
+    audio: ["src/audio/the-lemon-twigs.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[111] = {
+    name:  ["The Shelters"],
+    audio: ["src/audio/the-shelters.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[112] = {
+    name:  ["Blossoms"],
+    audio: ["src/audio/blossoms.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[113] = {
+    name:  ["Jacob Banks"],
+    audio: ["src/audio/jacob-banks.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[114] = {
+    name:  ["Barns Courtney"],
+    audio: ["src/audio/barns-courtney.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[115] = {
+    name:  ["Vant"],
+    audio: ["src/audio/vant.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[116] = {
+    name:  ["Middle Kids"],
+    audio: ["src/audio/middle-kids.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[117] = {
+    name:  ["White Reaper"],
+    audio: ["src/audio/white-reapar.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[118] = {
+    name:  ["Whethan"],
+    audio: ["src/audio/whethan.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[119] = {
+    name:  ["Jain"],
+    audio: ["src/audio/jain.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/06"]
+};
+artist[102] = {
+    name:  ["Grace Mitchel"],
+    audio: ["src/audio/grace-mitchel.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[116] = {
+    name:  ["Mondo Cozmo"],
+    audio: ["src/audio/mondo-cozmo.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[117] = {
+    name:  ["San Holo"],
+    audio: ["src/audio/san-holo.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[118] = {
+    name:  ["Blaenovon"],
+    audio: ["src/audio/blaenovon.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[119] = {
+    name:  ["Michael Christmas"],
+    audio: ["src/audio/michael-christmas.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[120] = {
+    name:  ["Lo Moon"],
+    audio: ["src/audio/lo-moon.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[121] = {
+    name:  ["Oliver Tree"],
+    audio: ["src/audio/oliver-tree.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[122] = {
+    name:  ["The O'My's"],
+    audio: ["src/audio/the-omys.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[123] = {
+    name:  ["Flint Eastwood"],
+    audio: ["src/audio/flint-eastwood.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[124] = {
+    name:  ["Declan Mckenna"],
+    audio: ["src/audio/declan-mckenna.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[125] = {
+    name:  ["The Frights"],
+    audio: ["src/audio/the-frights.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[126] = {
+    name:  ["Saint Jhn"],
+    audio: ["src/audio/saint-jhn.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[127] = {
+    name:  ["Dirty Audio"],
+    audio: ["src/audio/dirty-audio.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[128] = {
+    name:  ["Unlike Pluto"],
+    audio: ["src/audio/unlike-pluto.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[129] = {
+    name:  ["Ron Gallo"],
+    audio: ["src/audio/ron-gallo.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[131] = {
+    name:  ["Bibi Bourelly"],
+    audio: ["src/audio/bibi-bourelly.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[132] = {
+    name:  ["Atlas Genius"],
+    audio: ["src/audio/atlas-genius.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[133] = {
+    name:  ["Sofi Tukker"],
+    audio: ["src/audio/sofi-tukker.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[134] = {
+    name:  ["Xavier Omar"],
+    audio: ["src/audio/xavier-omar.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[135] = {
+    name:  ["Young Bombs"],
+    audio: ["src/audio/young-bombs.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[136] = {
+    name:  ["Missio"],
+    audio: ["src/audio/missio.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[137] = {
+    name:  ["The Loundon Souls"],
+    audio: ["src/audio/the-loundon-souls.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[138] = {
+    name:  ["Cobi"],
+    audio: ["src/audio/cobi.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[139] = {
+    name:  ["A R I Z O N A"],
+    audio: ["src/audio/arizona.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[140] = {
+    name:  ["Moksi"],
+    audio: ["src/audio/moksi.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[141] = {
+    name:  ["Gibbz"],
+    audio: ["src/audio/gibbz.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[142] = {
+    name:  ["Boogie"],
+    audio: ["src/audio/boogie.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[143] = {
+    name:  ["888"],
+    audio: ["src/audio/888.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[144] = {
+    name:  ["Wingtip"],
+    audio: ["src/audio/wingtip.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[145] = {
+    name:  ["Wax Motif"],
+    audio: ["src/audio/wax-motif.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[136] = {
+    name:  ["Pham"],
+    audio: ["src/audio/pham.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[137] = {
+    name:  ["We Are The Grand"],
+    audio: ["src/audio/we-are-the-grand.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[138] = {
+    name:  ["Michael Blume"],
+    audio: ["src/audio/michael-blume.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[139] = {
+    name:  ["Slothrust"],
+    audio: ["src/audio/slothrust.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[140] = {
+    name:  ["Elohim"],
+    audio: ["src/audio/elohim.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[141] = {
+    name:  ["Colony House"],
+    audio: ["src/audio/colony-house.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[142] = {
+    name:  ["Stanaj"],
+    audio: ["src/audio/stanaj.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[143] = {
+    name:  ["The Walters"],
+    audio: ["src/audio/the-walters.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[144] = {
+    name:  ["Allan Rayman"],
+    audio: ["src/audio/allan-rayman.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[145] = {
+    name:  ["Duckwrth"],
+    audio: ["src/audio/duckwrth.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[146] = {
+    name:  ["Frenship"],
+    audio: ["src/audio/frenship.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[147] = {
+    name:  ["Spencer Ludwig"],
+    audio: ["src/audio/spencer-ludwig.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[148] = {
+    name:  ["Flor"],
+    audio: ["src/audio/flor.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[149] = {
+    name:  ["Kweku Collins"],
+    audio: ["src/audio/kweku-collins.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[150] = {
+    name:  ["Harriet Brown"],
+    audio: ["src/audio/harriet-brown.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[151] = {
+    name:  ["DJ Who"],
+    audio: ["src/audio/dj-who.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[152] = {
+    name:  ["Brayton Bowman"],
+    audio: ["src/audio/brayton-bowman.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[153] = {
+    name:  ["Goody Grace"],
+    audio: ["src/audio/goody-grace.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[154] = {
+    name:  ["Jesse Malin"],
+    audio: ["src/audio/jesse-malin.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[155] = {
+    name:  ["Max"],
+    audio: ["src/audio/max.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[156] = {
+    name:  ["Tucker Beathard"],
+    audio: ["src/audio/tucker-beathard.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[157] = {
+    name:  ["Caitlin Smith"],
+    audio: ["src/audio/caitlin-smith.mp3"],
+    link:  [""],
+    date:  ["Fri 8/04"]
+};
+artist[158] = {
+    name:  ["Golf Clap"],
+    audio: ["src/audio/golf-clap.mp3"],
+    link:  [""],
+    date:  ["Thurs 8/03"]
+};
+artist[159] = {
+    name:  ["Boogie T"],
+    audio: ["src/audio/boogie-t.mp3"],
+    link:  [""],
+    date:  ["Sun 8/06"]
+};
+artist[160] = {
+    name:  ["Nathan Scott"],
+    audio: ["src/audio/nathan-scott.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
+artist[161] = {
+    name:  ["Lady Pills"],
+    audio: ["src/audio/lady-pills.mp3"],
+    link:  [""],
+    date:  ["Sat 8/05"]
+};
 
 
 var spinner = anime({
