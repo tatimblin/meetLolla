@@ -536,55 +536,55 @@ artist[73] = {
 artist[74] = {
     name:  ["A-Trak"],
     audio: ["src/audio/a-trak.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=1HcRmw7Hv2g"],
     date:  ["Thurs 8/03"]
 };
 artist[75] = {
     name:  ["6lack"],
     audio: ["src/audio/6lack.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=fS9m0Ac8PCU"],
     date:  ["Sun 8/06"]
 };
 artist[76] = {
     name:  ["Cloud Nothings"],
     audio: ["src/audio/cloud-nothings.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=74TP8QhupLU&feature=youtu.be"],
     date:  ["Fri 8/04"]
 };
 artist[77] = {
     name:  ["Tritonal"],
     audio: ["src/audio/tritonal.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=gUrbvX4mOHg"],
     date:  ["Thurs 8/03"]
 };
 artist[78] = {
     name:  ["Sampha"],
     audio: ["src/audio/sampha.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=_NSuIYwBxu4"],
     date:  ["Sun 8/06"]
 };
 artist[79] = {
     name:  ["Jai Wolf"],
     audio: ["src/audio/jai-wolf.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=Z9VoDwy-3Lc"],
     date:  ["Sat 8/05"]
 };
 artist[80] = {
     name:  ["Ephwurd"],
     audio: ["src/audio/ephwurd.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=4JX7XaQXDqE"],
     date:  ["Sat 8/05"]
 };
 artist[81] = {
     name:  ["Alvvays"],
     audio: ["src/audio/alvvays.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=ZAn3JdtSrnY"],
     date:  ["Sat 8/05"]
 };
 artist[82] = {
     name:  ["Maggie Rogers"],
     audio: ["src/audio/maggie-rogers.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=cdIBxhONpC0"],
     date:  ["Sun 8/06"]
 };
 artist[83] = {
@@ -1162,19 +1162,53 @@ $('.shuffle-next').on('click',function(){
 
 function nextSong() {
     spinner.restart();
-    
     var rand = Math.floor(Math.random() * artist.length);
     
 	var name  = artist[rand].name[0];
 	var audio = artist[rand].audio[0];
     var link = artist[rand].link[0];
     var date  = artist[rand].date[0];
+    
+    // Name
+    //$(".shuffle-artist h1").html(name);
 	
-    $(".shuffle-artist h1").html(name);
+    // Music
     var sourceMp3=document.getElementById('audio');
     sourceMp3.src= audio;
     document.getElementById('sourceHref').href=link;
+    
+    // Date
     $(".shuffle-date h4").html(date);
+    
+    // Animate name in/out
+    $( ".shuffle-artist h1" ).fadeOut( "fast", function() {
+        $(".shuffle-artist h1").html(name);
+        var elem = $(this);
+        var characters = elem.text().split("");
+        elem.empty();
+
+        $.each(characters, function (i, el) {
+            elem.append("<span style='display:inline-block; transform-origin:center bottom; transform: translateY(120px) scale(0); max-width:0px; opacity:0;' class='shuffle-artist-letter'>" + el + "</span>");
+        });
+        
+        var els = document.querySelectorAll('.shuffle-artist .shuffle-artist-letter');
+
+        var artistAnim = anime({
+            targets: els,
+            translateY: 0,
+            scale:1,
+            opacity: 1,
+            maxWidth: 100,
+            duration: function(el, i, l) {
+                return 700 + (i * Math.random()* 500);
+            },
+            direction: 'alternate', // stop vanishing
+            loop: false 
+        });
+        
+        $(this).fadeIn(400);
+        artistAnim.restart();
+    });
 }
 
 // Audio control
