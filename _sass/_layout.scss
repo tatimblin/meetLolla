@@ -4,7 +4,7 @@
 .site-header {
     //border-top: 5px solid $grey-color-dark;
     background: $red;
-    min-height: 56px;
+    min-height: 60px;
 
     // Positioning context for the mobile navigation icon
     position: relative;
@@ -21,13 +21,17 @@
             color: $background-color;
         }
         @include media-query($on-laptop) {
+            flex-direction: column;
+            justify-content: center;
             max-width: $content-width - $spacing-unit;
             padding-right: $spacing-unit / 2;
             padding-left: $spacing-unit / 2;
+            text-align: center;
         }
     }
     &-top {
         position: relative;
+        min-height: 60px;
         &-control {
             position: absolute;
             height: 100%;
@@ -42,7 +46,7 @@
 }
 
 .site-title {
-    width: 150px; height: 50px;
+    width: 150px; height: 60px;
     float: left;
     background: url('../img/meet-lolla-logo.png') no-repeat;
     background-size: contain;
@@ -54,7 +58,7 @@
 
 .site-nav {
     float: right;
-    line-height: 56px;
+    line-height: 60px;
 
     .menu-icon {
         display: none;
@@ -68,6 +72,9 @@
         &:not(:last-child) {
             margin-right: 20px;
         }
+    }
+    .trigger {
+        a {color: white;}
     }
 
     @include media-query($on-palm) {
@@ -101,6 +108,10 @@
         .trigger {
             clear: both;
             display: none;
+            a {
+                padding: 0 10px;
+                color: $purple;
+            }
         }
 
         &:hover .trigger {
@@ -140,6 +151,14 @@
             width: 50%;
             line-height: 100px;
         }
+        &-share {
+            a:nth-child(odd) {
+                display: inline-block;
+                @include media-query($on-laptop) {
+                    display: none;
+                }
+            }
+        }
         &-credit {
             display: flex;
             background:$grey-color-dark;
@@ -147,6 +166,9 @@
                 margin: 20px;
                 &-speaker-cover {
                     background:$grey-color-dark;
+                    @include media-query($on-laptop) {
+                        background:$twitter;
+                    }
                 }
             }
             &_inner {
@@ -165,6 +187,12 @@
             a {
                 margin: 0 15px;
                 color: $background-color;
+            }
+        }
+        @include media-query($on-laptop) {
+            flex-direction: column;
+            &-item {
+                width: 100%;
             }
         }
     }

@@ -46,6 +46,11 @@
     background-color: #EC9683;
     
 	bottom: 0px;
+    &:nth-child(odd) {
+        @include media-query($on-laptop) {
+            display:none;
+        }
+    }
 	&:before {
 		position: absolute;
 		width:70px; height:70px;

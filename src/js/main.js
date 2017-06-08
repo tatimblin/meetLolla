@@ -82,7 +82,19 @@ $(function () {
 
 // ### INIT SKROLLR ###
 
-var s = skrollr.init();
+$(function () {
+  // initialize skrollr if the window width is large enough
+  if ($(window).width() > 600) {
+    skrollr.init();
+  }
+
+  // disable skrollr if the window is resized below 768px wide
+  $(window).on('resize', function () {
+    if ($(window).width() <= 600) {
+      skrollr.init().destroy(); // skrollr.init() returns the singleton created above
+    }
+  });
+});
 
 
 // ### ARTIST DATA ###
@@ -342,10 +354,10 @@ artist[41] = {
     date:  ["Sat 8/05"]
 };
 artist[42] = {   //   EMPTY!!!!
-    name:  [""],
-    audio: ["src/audio/21-savage.mp3"],
-    link:  [""],
-    date:  [""]
+    name:  ["Lady Pills"],
+    audio: ["src/audio/lady-pills.mp3"],
+    link:  ["https://www.youtube.com/watch?v=56KWZopvaXY"],
+    date:  ["Sat 8/05"]
 };
 artist[43] = {
     name:  ["Banks"],
@@ -590,555 +602,550 @@ artist[82] = {
 artist[83] = {
     name:  ["Jidenna"],
     audio: ["src/audio/jidenna.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=JWIqrKhP2Kg"],
     date:  ["Fri 8/04"]
 };
 artist[84] = {
     name:  ["Mura Masa"],
     audio: ["src/audio/mura-masa.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=Z9doCz9P6Pw"],
     date:  ["Fri 8/04"]
 };
 artist[85] = {
     name:  ["NF"],
     audio: ["src/audio/nf.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=Po5zT1krKOc"],
     date:  ["Sun 8/06"]
 };
 artist[86] = {
     name:  ["Gryffin"],
     audio: ["src/audio/gryffin.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=PWhMoGt0cs8"],
     date:  ["Thurs 8/03"]
 };
 artist[87] = {
     name:  ["Joyryde"],
     audio: ["src/audio/joyryde.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=qVi0kEAceik"],
     date:  ["Sun 8/06"]
 };
 artist[88] = {
     name:  ["CRX"],
-    audio: ["src/audio/.mp3"],
-    link:  [""],
+    audio: ["src/audio/crx.mp3"],
+    link:  ["https://www.youtube.com/watch?v=V8Wq2mO5XyM"],
     date:  ["Thurs 8/03"]
 };
 artist[89] = {
     name:  ["Temples"],
     audio: ["src/audio/temples.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=h6zdVaAe0OE"],
     date:  ["Thurs 8/03"]
 };
 artist[90] = {
     name:  ["G Jones"],
     audio: ["src/audio/g-jones.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=pZGNblFCvp0"],
     date:  ["Sat 8/05"]
 };
 artist[91] = {
     name:  ["$uicideboy$"],
     audio: ["src/audio/suicideboys.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=Nbe-h8Skv3Q"],
     date:  ["Thurs 8/03"]
 };
 artist[92] = {
     name:  ["Bishop Briggs"],
     audio: ["src/audio/bishop-briggs.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=h5jz8xdpR0M"],
     date:  ["Fri 8/04"]
 };
 artist[93] = {
     name:  ["Amine"],
     audio: ["src/audio/amine.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=3j8ecF8Wt4E"],
     date:  ["Sat 8/05"]
 };
 artist[94] = {
     name:  ["Ookay"],
     audio: ["src/audio/ookay.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=knnf2Aw6kMU"],
     date:  ["Fri 8/04"]
 };
 artist[95] = {
     name:  ["The Districts"],
     audio: ["src/audio/the-districts.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=zEdWd1W3cV0"],
     date:  ["Fri 8/04"]
 };
 artist[96] = {
     name:  ["San Fermin"],
     audio: ["src/audio/san-fermin.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=Ld81Y6Em3NM"],
     date:  ["Sat 8/05"]
 };
 artist[97] = {
     name:  ["Joseph"],
     audio: ["src/audio/joseph.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=uVPZADVYqdI"],
     date:  ["Sun 8/06"]
 };
 artist[98] = {
     name:  ["Pup"],
     audio: ["src/audio/pup.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=aa3Afg3fzAQ"],
     date:  ["Fri 8/04"]
 };
 artist[99] = {
     name:  ["Moose Blood"],
     audio: ["src/audio/moose-blood.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=0P1WIpgKqcA"],
     date:  ["Fri 8/05"]
 };
 artist[100] = {
     name:  ["The Japanese House"],
     audio: ["src/audio/the-japanese-house.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=LxZDxF0MyV0"],
     date:  ["Sat 8/05"]
 };
 artist[101] = {
     name:  ["Leon"],
     audio: ["src/audio/leon.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=u69lXmBs08o"],
     date:  ["Sat 8/05"]
 };
 artist[103] = {
     name:  ["Hippo Campus"],
     audio: ["src/audio/hippo-campus.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=n3TQKEUne5Q"],
     date:  ["Thurs 8/03"]
 };
 artist[104] = {
     name:  ["Honne"],
     audio: ["src/audio/honne.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=QF_VzOIECHM"],
     date:  ["Thurs 8/03"]
 };
 artist[105] = {
     name:  ["MadeinTYO"],
     audio: ["src/audio/madeintyo.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=BcyFJLrBVhA"],
     date:  ["Sat 8/05"]
 };
 artist[106] = {
     name:  ["Cheat Codes"],
     audio: ["src/audio/cheat-codes.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=q1ppRNny9qU"],
     date:  ["Thurs 8/03"]
 };
 artist[107] = {
     name:  ["Kevin Devine"],
     audio: ["src/audio/kevin-devine.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=1c8DFfzipZo"],
     date:  ["Thurs 8/03"]
 };
 artist[108] = {
     name:  ["Paper Diamond"],
     audio: ["src/audio/paper-diamond.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=-F-6ji-uOOg"],
     date:  ["Thurs 8/03"]
 };
 artist[109] = {
     name:  ["Skott"],
     audio: ["src/audio/skott.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=JxuEBt_RIRs"],
     date:  ["Fri 8/04"]
 };
 artist[110] = {
     name:  ["The Lemon Twigs"],
     audio: ["src/audio/the-lemon-twigs.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=pJGzm2fF2Uo"],
     date:  ["Fri 8/04"]
 };
 artist[111] = {
     name:  ["The Shelters"],
     audio: ["src/audio/the-shelters.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=t_oRcpHv2k0"],
     date:  ["Sat 8/05"]
 };
 artist[112] = {
     name:  ["Blossoms"],
     audio: ["src/audio/blossoms.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=tbTmNXbH_Rs"],
     date:  ["Sat 8/05"]
 };
 artist[113] = {
     name:  ["Jacob Banks"],
     audio: ["src/audio/jacob-banks.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=wjNxTyEZBMc"],
     date:  ["Sat 8/05"]
 };
 artist[114] = {
     name:  ["Barns Courtney"],
     audio: ["src/audio/barns-courtney.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=hLEoictM8p4"],
     date:  ["Sun 8/06"]
 };
 artist[115] = {
     name:  ["Vant"],
     audio: ["src/audio/vant.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=coeO8HWHjoc"],
     date:  ["Sun 8/06"]
 };
 artist[116] = {
     name:  ["Middle Kids"],
     audio: ["src/audio/middle-kids.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=sUC7OFUbn6A"],
     date:  ["Thurs 8/03"]
 };
 artist[117] = {
     name:  ["White Reaper"],
     audio: ["src/audio/white-reapar.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=B09kpkZyDtg"],
     date:  ["Thurs 8/03"]
 };
 artist[118] = {
     name:  ["Whethan"],
     audio: ["src/audio/whethan.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=96Bo8n35LYw"],
     date:  ["Sun 8/06"]
 };
 artist[119] = {
     name:  ["Jain"],
     audio: ["src/audio/jain.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=59Q_lhgGANc"],
     date:  ["Thurs 8/06"]
 };
 artist[102] = {
-    name:  ["Grace Mitchel"],
-    audio: ["src/audio/grace-mitchel.mp3"],
-    link:  [""],
+    name:  ["Grace Mitchell"],
+    audio: ["src/audio/grace-mitchell.mp3"],
+    link:  ["https://www.youtube.com/watch?v=X5zMJUidGLs"],
     date:  ["Sun 8/06"]
 };
 artist[116] = {
     name:  ["Mondo Cozmo"],
     audio: ["src/audio/mondo-cozmo.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=1pOUbcbTvOU"],
     date:  ["Fri 8/04"]
 };
 artist[117] = {
     name:  ["San Holo"],
     audio: ["src/audio/san-holo.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=ULHeRdgeT54"],
     date:  ["Fri 8/04"]
 };
 artist[118] = {
     name:  ["Blaenovon"],
     audio: ["src/audio/blaenovon.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=6VxmbYaNUDY"],
     date:  ["Sun 8/06"]
 };
 artist[119] = {
     name:  ["Michael Christmas"],
     audio: ["src/audio/michael-christmas.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=C_zpwxzNCjU"],
     date:  ["Sat 8/05"]
 };
 artist[120] = {
     name:  ["Lo Moon"],
     audio: ["src/audio/lo-moon.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=bnXkMNyc794"],
     date:  ["Sun 8/06"]
 };
 artist[121] = {
     name:  ["Oliver Tree"],
     audio: ["src/audio/oliver-tree.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=56zwM5B2W_k"],
     date:  ["Thurs 8/03"]
 };
 artist[122] = {
     name:  ["The O'My's"],
     audio: ["src/audio/the-omys.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=msism59CuvI"],
     date:  ["Thurs 8/03"]
 };
 artist[123] = {
     name:  ["Flint Eastwood"],
     audio: ["src/audio/flint-eastwood.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=HN0cp6xvGaI"],
     date:  ["Sat 8/05"]
 };
 artist[124] = {
     name:  ["Declan Mckenna"],
     audio: ["src/audio/declan-mckenna.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=QHgh77iE6qc"],
     date:  ["Thurs 8/03"]
 };
 artist[125] = {
     name:  ["The Frights"],
     audio: ["src/audio/the-frights.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=0e_mhn4VN7U"],
     date:  ["Fri 8/04"]
 };
 artist[126] = {
     name:  ["Saint Jhn"],
     audio: ["src/audio/saint-jhn.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=R5GNIZP0ceE"],
     date:  ["Fri 8/04"]
 };
 artist[127] = {
     name:  ["Dirty Audio"],
     audio: ["src/audio/dirty-audio.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=GhHIqrK3sdc"],
     date:  ["Sun 8/06"]
 };
 artist[128] = {
     name:  ["Unlike Pluto"],
     audio: ["src/audio/unlike-pluto.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=lcg6wekmCRA"],
     date:  ["Thurs 8/03"]
 };
 artist[129] = {
     name:  ["Ron Gallo"],
     audio: ["src/audio/ron-gallo.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=m3yqgRyHkSU"],
     date:  ["Sat 8/05"]
 };
 artist[131] = {
     name:  ["Bibi Bourelly"],
     audio: ["src/audio/bibi-bourelly.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=uJPSIL3DCmY"],
     date:  ["Fri 8/04"]
 };
 artist[132] = {
     name:  ["Atlas Genius"],
     audio: ["src/audio/atlas-genius.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=PeAUf-VeXbE"],
     date:  ["Thurs 8/03"]
 };
 artist[133] = {
     name:  ["Sofi Tukker"],
     audio: ["src/audio/sofi-tukker.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=gDoZz4ET3nw"],
     date:  ["Sun 8/06"]
 };
 artist[134] = {
     name:  ["Xavier Omar"],
     audio: ["src/audio/xavier-omar.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=aP2Sen3HP-4"],
     date:  ["Sun 8/06"]
 };
 artist[135] = {
     name:  ["Young Bombs"],
     audio: ["src/audio/young-bombs.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=I6LY5Rct7V0"],
     date:  ["Sat 8/05"]
 };
 artist[136] = {
     name:  ["Missio"],
     audio: ["src/audio/missio.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=AHukwv_VX9A"],
     date:  ["Fri 8/04"]
 };
 artist[137] = {
     name:  ["The Loundon Souls"],
     audio: ["src/audio/the-loundon-souls.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=S9_V_U7R7JU"],
     date:  ["Sat 8/05"]
 };
 artist[138] = {
     name:  ["Cobi"],
     audio: ["src/audio/cobi.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=96pQTiPWDpA"],
     date:  ["Fri 8/04"]
 };
 artist[139] = {
     name:  ["A R I Z O N A"],
     audio: ["src/audio/arizona.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=i-eX8ri3pr0"],
     date:  ["Thurs 8/03"]
 };
 artist[140] = {
     name:  ["Moksi"],
     audio: ["src/audio/moksi.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=ffuh0WaEt_E"],
     date:  ["Fri 8/04"]
 };
 artist[141] = {
     name:  ["Gibbz"],
     audio: ["src/audio/gibbz.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=cYID_TnNTjs"],
     date:  ["Thurs 8/03"]
 };
 artist[142] = {
     name:  ["Boogie"],
     audio: ["src/audio/boogie.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=JPl4FJKCeAU"],
     date:  ["Sun 8/06"]
 };
 artist[143] = {
     name:  ["888"],
     audio: ["src/audio/888.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=zWAk_CUmpIo"],
     date:  ["Sat 8/05"]
 };
 artist[144] = {
     name:  ["Wingtip"],
     audio: ["src/audio/wingtip.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=QfYka1LOAWg"],
     date:  ["Sat 8/05"]
 };
 artist[145] = {
     name:  ["Wax Motif"],
     audio: ["src/audio/wax-motif.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=d-rf_gT1leM"],
     date:  ["Sun 8/06"]
 };
 artist[136] = {
     name:  ["Pham"],
     audio: ["src/audio/pham.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=uuPMXS7dd9s"],
     date:  ["Thurs 8/03"]
 };
 artist[137] = {
     name:  ["We Are The Grand"],
     audio: ["src/audio/we-are-the-grand.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=ywdw4n370eA"],
     date:  ["Sat 8/05"]
 };
 artist[138] = {
     name:  ["Michael Blume"],
     audio: ["src/audio/michael-blume.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=1qsC-tGRRgw"],
     date:  ["Thurs 8/03"]
 };
 artist[139] = {
     name:  ["Slothrust"],
     audio: ["src/audio/slothrust.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=yjhP1j-7Asw"],
     date:  ["Fri 8/04"]
 };
 artist[140] = {
     name:  ["Elohim"],
     audio: ["src/audio/elohim.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=DzOpGMg8g5M"],
     date:  ["Thurs 8/03"]
 };
 artist[141] = {
     name:  ["Colony House"],
     audio: ["src/audio/colony-house.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=PcoIbdT6n9I"],
     date:  ["Sat 8/05"]
 };
 artist[142] = {
     name:  ["Stanaj"],
     audio: ["src/audio/stanaj.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=7dayEcfvmbQ"],
     date:  ["Thurs 8/03"]
 };
 artist[143] = {
     name:  ["The Walters"],
     audio: ["src/audio/the-walters.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=E1V_8LPIPxA"],
     date:  ["Sun 8/06"]
 };
 artist[144] = {
     name:  ["Allan Rayman"],
     audio: ["src/audio/allan-rayman.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=vRtXAtzItZM"],
     date:  ["Fri 8/04"]
 };
 artist[145] = {
     name:  ["Duckwrth"],
     audio: ["src/audio/duckwrth.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=vV71CEm-svU"],
     date:  ["Sun 8/06"]
 };
 artist[146] = {
     name:  ["Frenship"],
     audio: ["src/audio/frenship.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=E8EMeAp1qLo"],
     date:  ["Fri 8/04"]
 };
 artist[147] = {
     name:  ["Spencer Ludwig"],
     audio: ["src/audio/spencer-ludwig.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=M1Du2te2TBs"],
     date:  ["Sun 8/06"]
 };
 artist[148] = {
     name:  ["Flor"],
     audio: ["src/audio/flor.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=kTwq6SKE-_U"],
     date:  ["Sun 8/06"]
 };
 artist[149] = {
     name:  ["Kweku Collins"],
     audio: ["src/audio/kweku-collins.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=nl6OW07A5q4"],
     date:  ["Thurs 8/03"]
 };
 artist[150] = {
     name:  ["Harriet Brown"],
     audio: ["src/audio/harriet-brown.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=k78KxrtvJcA"],
     date:  ["Fri 8/04"]
 };
 artist[151] = {
     name:  ["DJ Who"],
     audio: ["src/audio/dj-who.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=iCrQQwiAZek"],
     date:  ["Fri 8/04"]
 };
 artist[152] = {
     name:  ["Brayton Bowman"],
     audio: ["src/audio/brayton-bowman.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=zissHAc_Vqw"],
     date:  ["Sat 8/05"]
 };
 artist[153] = {
     name:  ["Goody Grace"],
     audio: ["src/audio/goody-grace.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=6eedOjgbtTM"],
     date:  ["Sun 8/06"]
 };
 artist[154] = {
     name:  ["Jesse Malin"],
     audio: ["src/audio/jesse-malin.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=1vAhriKOSFU"],
     date:  ["Fri 8/04"]
 };
 artist[155] = {
     name:  ["Max"],
     audio: ["src/audio/max.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=5-xVwxqjNyI"],
     date:  ["Thurs 8/03"]
 };
 artist[156] = {
     name:  ["Tucker Beathard"],
     audio: ["src/audio/tucker-beathard.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=PnUmqiCd2nU"],
     date:  ["Sun 8/06"]
 };
 artist[157] = {
     name:  ["Caitlin Smith"],
     audio: ["src/audio/caitlin-smith.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=ajT4Xn1UNoU"],
     date:  ["Fri 8/04"]
 };
 artist[158] = {
     name:  ["Golf Clap"],
     audio: ["src/audio/golf-clap.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=5rogRYzuI_g"],
     date:  ["Thurs 8/03"]
 };
 artist[159] = {
     name:  ["Boogie T"],
     audio: ["src/audio/boogie-t.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=gvhYuYqMjaE"],
     date:  ["Sun 8/06"]
 };
 artist[160] = {
     name:  ["Nathan Scott"],
     audio: ["src/audio/nathan-scott.mp3"],
-    link:  [""],
+    link:  ["https://www.youtube.com/watch?v=LUF2q89iOuI"],
     date:  ["Sat 8/05"]
 };
-artist[161] = {
-    name:  ["Lady Pills"],
-    audio: ["src/audio/lady-pills.mp3"],
-    link:  [""],
-    date:  ["Sat 8/05"]
-};
+
 
 
 var spinner = anime({
@@ -1214,11 +1221,16 @@ function nextSong() {
 // Audio control
 $('.sound-icon').on('click', function() {
     
+    muteSong();
+    
+});
+
+function muteSong() {
     $('.sound-icon-speaker-cover').toggleClass('silent');
     var audioElem = document.getElementById('audio');
     if (audioElem.volume == 1)
         audioElem.volume = 0;
      else
         audioElem.volume = 1;
-});
+}
 
