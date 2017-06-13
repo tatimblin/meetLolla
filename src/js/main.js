@@ -1,3 +1,101 @@
+
+var spinner = anime({
+    targets: '.shuffle-next-icon',
+    rotate: -720,
+    duration: 3000
+});
+
+// Timer to change song after x seconds
+var timer = setInterval(function() { 
+    audio.load();
+    audio.play();
+    nextSong(); 
+}, 30000);
+
+$('.shuffle-next').on('click',function(){ 
+    clearInterval(timer);
+    timer = setInterval(function() { 
+        nextSong(); 
+    }, 30000);
+    nextSong();
+});
+
+function nextSong() {
+    spinner.restart();
+    var rand = Math.floor(Math.random() * artist.length);
+    
+	var name  = artist[rand].name[0];
+	var audioUrl = artist[rand].audio[0];
+    var link = artist[rand].link[0];
+    var date  = artist[rand].date[0];
+    
+    // Name
+    //$(".shuffle-artist h1").html(name);
+	
+    // Music
+    //audio.pause();
+
+    var audio = document.querySelector("audio");
+    audio.pause();
+    audio.src= audioUrl;
+    audio.load();
+    $("#audio").bind('canplay', function() {
+		audio.play();
+	});
+    
+    // Youtube
+    document.getElementById('sourceHref').href=link;
+    
+    // Date
+    $(".shuffle-date h4").html(date);
+    
+    // Animate name in/out
+    $( ".shuffle-artist h1" ).fadeOut( "fast", function() {
+        $(".shuffle-artist h1").html(name);
+        var elem = $(this);
+        var characters = elem.text().split("");
+        elem.empty();
+
+        $.each(characters, function (i, el) {
+            elem.append("<span style='display:inline-block; transform-origin:center bottom; transform: translateY(120px) scale(0); max-width:0px; opacity:0;' class='shuffle-artist-letter'>" + el + "</span>");
+        });
+        
+        var els = document.querySelectorAll('.shuffle-artist .shuffle-artist-letter');
+
+        var artistAnim = anime({
+            targets: els,
+            translateY: 0,
+            scale:1,
+            opacity: 1,
+            maxWidth: 100,
+            duration: function(el, i, l) {
+                return 700 + (i * Math.random()* 500);
+            },
+            direction: 'alternate', // stop vanishing
+            loop: false 
+        });
+        
+        $(this).fadeIn(400);
+        artistAnim.restart();
+    });
+}
+
+// Audio control
+$('.sound-icon').on('click', function() {
+    
+    muteSong();
+    
+});
+
+function muteSong() {
+    $('.sound-icon-speaker-cover').toggleClass('silent');
+    var audioElem = document.getElementById('audio');
+    if (audioElem.volume == 1)
+        audioElem.volume = 0;
+     else
+        audioElem.volume = 1;
+}
+
 // ### VISUALIZER ###
 
 $(function () {
@@ -1146,91 +1244,4 @@ artist[160] = {
     date:  ["Sat 8/05"]
 };
 
-
-
-var spinner = anime({
-    targets: '.shuffle-next-icon',
-    rotate: -720,
-    duration: 3000
-});
-
-// Timer to change song after x seconds
-var timer = setInterval(function() { 
-    nextSong(); 
-}, 30000);
-
-$('.shuffle-next').on('click',function(){ 
-    clearInterval(timer);
-    timer = setInterval(function() { 
-        nextSong(); 
-    }, 30000);
-    nextSong();
-});
-
-function nextSong() {
-    spinner.restart();
-    var rand = Math.floor(Math.random() * artist.length);
-    
-	var name  = artist[rand].name[0];
-	var audio = artist[rand].audio[0];
-    var link = artist[rand].link[0];
-    var date  = artist[rand].date[0];
-    
-    // Name
-    //$(".shuffle-artist h1").html(name);
-	
-    // Music
-    var sourceMp3=document.getElementById('audio');
-    sourceMp3.src= audio;
-    document.getElementById('sourceHref').href=link;
-    
-    // Date
-    $(".shuffle-date h4").html(date);
-    
-    // Animate name in/out
-    $( ".shuffle-artist h1" ).fadeOut( "fast", function() {
-        $(".shuffle-artist h1").html(name);
-        var elem = $(this);
-        var characters = elem.text().split("");
-        elem.empty();
-
-        $.each(characters, function (i, el) {
-            elem.append("<span style='display:inline-block; transform-origin:center bottom; transform: translateY(120px) scale(0); max-width:0px; opacity:0;' class='shuffle-artist-letter'>" + el + "</span>");
-        });
-        
-        var els = document.querySelectorAll('.shuffle-artist .shuffle-artist-letter');
-
-        var artistAnim = anime({
-            targets: els,
-            translateY: 0,
-            scale:1,
-            opacity: 1,
-            maxWidth: 100,
-            duration: function(el, i, l) {
-                return 700 + (i * Math.random()* 500);
-            },
-            direction: 'alternate', // stop vanishing
-            loop: false 
-        });
-        
-        $(this).fadeIn(400);
-        artistAnim.restart();
-    });
-}
-
-// Audio control
-$('.sound-icon').on('click', function() {
-    
-    muteSong();
-    
-});
-
-function muteSong() {
-    $('.sound-icon-speaker-cover').toggleClass('silent');
-    var audioElem = document.getElementById('audio');
-    if (audioElem.volume == 1)
-        audioElem.volume = 0;
-     else
-        audioElem.volume = 1;
-}
 

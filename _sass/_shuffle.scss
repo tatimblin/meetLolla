@@ -54,6 +54,7 @@
         width: 200px;
         margin: 0 auto;
         transform: translateY(-90px);
+        cursor: pointer;
         @include media-query($on-palm) {
             transform: translateY(-50px);
             animation: next-nudge-sm 5s ease infinite;
