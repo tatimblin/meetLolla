@@ -42,6 +42,12 @@ function nextSong() {
     $("#audio").bind('canplay', function() {
 		audio.play();
 	});
+    if ($(window).width() <= 600) {
+        console.log('detecting mobile');
+        audio.play();
+        audio.src = audioUrl; // Set the real audio source
+        beeper = setInterval(function() { audio.play(); } ,1000 * 60);
+    }
     
     // Youtube
     document.getElementById('sourceHref').href=link;
