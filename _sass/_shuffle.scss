@@ -19,12 +19,12 @@
     &-artist {
         position: relative;
         overflow: hidden;
-        filter:contrast(20);
+        //filter:contrast(20);
         
         padding: 50px 0;
         transform: translateY(50px);
         
-        background-color: $background-color;
+        background-color: $background-color !important;
         h1 {
             text-align: center;
             font-size: 7em;
@@ -33,7 +33,7 @@
                 font-size: 5em;
                 line-height: 1em;
             }
-            filter: blur(0.2rem);
+            //filter: blur(0.2rem);
             //overflow: hidden;
         }
         &-letter {
