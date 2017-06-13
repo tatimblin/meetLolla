@@ -138,10 +138,15 @@
 /**
  * Site footer
  */
+.page-content { @include media-query($on-palm) { margin: 0 !important; } } // Remove margin for footer to be revaled.
+
 .site-footer {
     position: fixed;
-    //height: 100px;
     z-index: -1;
+    @include media-query($on-palm) {
+        position: relative;
+        z-index: 1;
+    }
     &-content {
         position: fixed;
         display: flex;
@@ -149,6 +154,13 @@
         right: 0; left:0;
         bottom: 0;
         z-index: 0;
+        @include media-query($on-palm) {
+            position: relative;
+            height: auto;
+            right: auto; left:auto;
+            bottom: auto;
+            z-index: 10;
+        }
         &-item {
             width: 50%;
             line-height: 100px;
@@ -156,8 +168,9 @@
         &-share {
             a:nth-child(odd) {
                 display: inline-block;
-                @include media-query($on-laptop) {
-                    display: none;
+                @include media-query($on-palm) {
+                    //display: none;
+                    margin: 0 0px;
                 }
             }
         }
@@ -168,9 +181,6 @@
                 margin: 20px;
                 &-speaker-cover {
                     background:$grey-color-dark;
-                    @include media-query($on-laptop) {
-                        background:$twitter;
-                    }
                 }
             }
             &_inner {
@@ -191,8 +201,8 @@
                 color: $background-color;
             }
         }
-        @include media-query($on-laptop) {
-            flex-direction: column;
+        @include media-query($on-palm) {
+            flex-direction: column-reverse;
             &-item {
                 width: 100%;
             }
@@ -210,7 +220,7 @@
     background-color: $background-color;
     box-shadow: 1px 2px 25px 5px rgba(100,100,150,.25), 1px 2px 35px 14px rgba(0,0,0,.10);
     margin: 0 0 100px 0;
-    z-index: 10;
+    //z-index: 10;
 }
 
 .page-heading {
