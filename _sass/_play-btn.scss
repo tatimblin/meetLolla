@@ -2,9 +2,12 @@ $speakerColor: $background-color;
 
 .sound-icon	{
 	position: relative;
+    overflow-x: hidden;
 	&-speaker {
 		display: flex;
 		align-items: center;
+        transform: translateX(15px);
+        overflow-x: hidden;
 		&-box {
 			width: 17px; height: 15px;
 			background: $speakerColor;
