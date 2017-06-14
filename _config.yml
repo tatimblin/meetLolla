@@ -13,7 +13,7 @@ description: > # this means to ignore newlines until "baseurl:"
   featuring over 100 different artists. meetlolla.com's goal is to
   give you a preview of some of these artists.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://yourdomain.com" # the base hostname & protocol for your site
+url: "http://meetlolla.com" # the base hostname & protocol for your site
 permalink: /artist/:title
 twitter_username: TristanTimblin
 github_username:  tatimblin

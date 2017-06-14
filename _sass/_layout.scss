@@ -58,7 +58,7 @@
 
 .site-nav {
     float: right;
-    line-height: 60px;
+    margin-top: 20px;
     @include media-query($on-laptop + 80) {
         margin-right:60px;
     }
@@ -150,6 +150,7 @@
     &-content {
         position: fixed;
         display: flex;
+        align-items: center;
         height: 100px;
         right: 0; left:0;
         bottom: 0;
@@ -162,8 +163,11 @@
             z-index: 10;
         }
         &-item {
-            width: 50%;
-            line-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50%; height: 100px;
+            padding-top: 0px;
         }
         &-share {
             a:nth-child(odd) {
@@ -178,7 +182,7 @@
             display: flex;
             background:$grey-color-dark;
             .sound-icon {
-                margin: 20px;
+                //margin: 20px;
                 &-speaker-cover {
                     background:$grey-color-dark;
                 }
@@ -186,6 +190,7 @@
             &_inner {
                 p, a {
                     color: $background-color;
+                    margin-bottom: 0;
                 }
             }
         }

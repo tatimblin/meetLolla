@@ -100,17 +100,38 @@ h1, h2, h3, h4, h5, h6 {
  * Links
  */
 a {
+    position: relative;
     color: $brand-color;
     text-decoration: none;
 
     &:visited {
         color: darken($brand-color, 15%);
     }
-
-    &:hover {
-        color: $text-color;
-        text-decoration: underline;
+}
+.link {
+    &:after {
+        position: absolute;
+        content:' ';
+        height: 2px;
+        width: 0%;
+        left: 0; bottom: -6px;
+        background-color: $red;
+        transition: all 400ms ease;
     }
+    transition: all 400ms ease;
+    &:hover {
+        color: $text-color !important;
+        text-decoration: none;
+        &:after {
+            width: 100%;
+        }
+    }
+}
+
+.grey-link:after {background-color: $text-color;}
+.red-link {
+    &:hover {color:$red !important;}
+    &:after {background-color:$red;}
 }
 
 
