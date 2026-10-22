@@ -1,0 +1,17 @@
+{
+  "name": "@tristimb/meet-lolla",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "meetLolla (2017) as an embeddable module: mount(el, { assetBase }) => { destroy() }.",
+  "module": "dist/index.js",
+  "exports": { ".": "./dist/index.js" },
+  "scripts": {
+    "build": "bun scripts/build.ts",
+    "dev": "bun scripts/serve.ts",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "svgo": "3.3.2"
+  }
+}

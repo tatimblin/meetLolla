@@ -1,15 +1,27 @@
----
-layout: home
----
-
-{% include logo.html %}
-    
-{% include chicago.html %}
-
-<div class="home">
-
-    {% include shuffle.html %}
-    
-    {% include visual.html %}
-
-</div>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>meet Lolla (dev)</title>
+  <link rel="icon" type="image/png" href="src/img/favicon/favicon32.png" sizes="32x32">
+  <style>
+    html, body { margin: 0; height: 100%; }
+    #stage { position: absolute; inset: 0; }
+  </style>
+</head>
+<body>
+  <!-- Dev page for `bun run dev`: mounts the module into a full-viewport box, the way the site's
+       Embed component does. window.lolla.{mount,destroy} are for poking at it from devtools. -->
+  <div id="stage"></div>
+  <script type="module">
+    import { mount } from "/dist/index.js";
+    const stage = document.getElementById("stage");
+    let handle = mount(stage, { assetBase: "/" });
+    window.lolla = {
+      mount() { handle = mount(stage, { assetBase: "/" }); return handle; },
+      destroy() { handle.destroy(); },
+    };
+  </script>
+</body>
+</html>
