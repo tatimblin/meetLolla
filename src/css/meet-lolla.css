@@ -8,8 +8,8 @@
 
 .meet-lolla {
   --ml-sky: #39b9e0;
-  --ml-sky-back: #26a7d7;
-  --ml-sky-front: #1295cb;
+  --ml-sky-back: #1294c8;       /* the poster's one skyline tone, sampled from its city art */
+  --ml-sky-front: #0e8bc0;
   --ml-crowd-shadow: #1b5aa3;   /* sampled from the poster's crowd silhouette */
   --ml-sun: #ffef66;
   --ml-navy: #1a5296;
