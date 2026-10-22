@@ -1,9 +1,10 @@
 # meet Lolla
 
-A 2017 school project: a shuffle player for the Lollapalooza 2017 lineup (Grant Park, Chicago,
-August 3-6, 2017). Tap the red arrow to hear a 30-second preview of a random artist; the hands
-along the bottom are the audio visualizer. Built June 2017, originally a Jekyll site at
-meetlolla.com; now packaged as an embeddable ES module.
+A 2017 school project: a player for the Lollapalooza 2017 lineup (Grant Park, Chicago,
+August 3-6, 2017), restyled in 2026 after the official poster. Pick a day, tap a name to hear a
+30-second preview (or Shuffle across all four days); the crowd of hands along the bottom is the
+audio visualiser and holds up a sign with what is playing. Built June 2017, originally a Jekyll
+site at meetlolla.com; now packaged as an embeddable ES module.
 
 ## Embed
 
@@ -16,7 +17,8 @@ handle.destroy();                          // idempotent; removes DOM, listeners
 ```
 
 - `assetBase` is the repo root as published, ending in `/`. Media is loaded from it as-is:
-  `src/audio/<slug>.mp3`, `src/img/...`, `assets/fonts/...`. Nothing is hard-coded to a host.
+  `src/audio/<slug>.mp3`, the crowd's hands (`src/img/hand*.svg`, `src/svg/poster/hands/`) and
+  `assets/fonts/`. Nothing is hard-coded to a host.
 - All DOM and CSS live under one `.meet-lolla` root inside `el` (the `<style>` is inside the root
   and goes away on `destroy()`). Keyframes and ids are `ml-` prefixed; nothing is fixed to the
   viewport, so it survives client-side navigations that mount/destroy repeatedly.
@@ -32,9 +34,11 @@ bun test         # every artist's audio file exists, no duplicates, valid dates/
 bun run build    # dist/index.js: one minified ESM file with the CSS and SVGs inlined
 ```
 
-Source: `src/js/index.js` (mount), `src/js/artists.js` (lineup data), `src/css/meet-lolla.css`,
-`src/svg/*.svg` (svgo runs at build time). The build is reproducible: same sources and
-`bun.lock`, same bytes.
+Source: `src/js/index.js` (mount), `src/js/lineup.js` (the poster's lineup by day and billing
+row), `src/js/artists.js` (clips and YouTube links), `src/css/meet-lolla.css`, `src/svg/*.svg`
+and `src/svg/poster/*.svg` (svgo runs at build time; the crowd recipe is
+`src/svg/poster/hands/hands.md`). The build is reproducible: same sources and `bun.lock`, same
+bytes.
 
 ## Release
 
@@ -53,12 +57,11 @@ workflow by hand with its `ref`.
 
 ## Fonts
 
-The 2017 site used Adobe Fonts (Prater Serif, Ubuntu Condensed) through a domain-locked Typekit
-kit. The embed self-hosts free stand-ins from Google Fonts, latin subset, in `assets/fonts/`:
+The poster's lineup type is a tall, condensed all-caps sans. The embed self-hosts the closest
+free match, **Antonio** (The Antonio Project Authors, SIL Open Font License 1.1,
+`assets/fonts/Antonio-OFL.txt`), as a variable font in latin and latin-ext subsets from Google
+Fonts. The Lollapalooza wordmark is the SVG in `src/svg/logo.svg`.
 
-- **Patua One** (LatinoType, SIL Open Font License 1.1, `assets/fonts/PatuaOne-OFL.txt`) for
-  Prater Serif.
-- **Ubuntu Condensed** (Dalton Maag, Ubuntu Font Licence 1.0, `assets/fonts/UbuntuCondensed-UFL.txt`).
-
-The song previews in `src/audio/` belong to their artists and labels and are included for this
-educational project only.
+The poster art in `src/svg/poster/` is a flat re-drawing in the style of the official 2017
+admat; the admat itself is not included. The song previews in `src/audio/` belong to their
+artists and labels and are included for this educational project only.

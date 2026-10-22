@@ -1,22 +1,21 @@
 /*
- * meet Lolla, scoped under .meet-lolla. Ported from the 2017 Jekyll Sass (_sass/*.scss).
+ * meet Lolla, scoped under .meet-lolla: the official 2017 poster as a player.
  * Rules: every selector starts at .meet-lolla, keyframes are ml- prefixed, nothing is fixed to
  * the viewport, and breakpoints are container queries on the root (it is the scroller).
- * mount() prepends the @font-face rules and sets --ml-hand-N / --ml-p as custom properties.
+ * mount() prepends the @font-face rules and sets --ml-p (parallax), --ml-base (lineup size),
+ * and per-hand variables on .ml-hand.
  */
 
 .meet-lolla {
-  --ml-red: #ee3f54;           /* arrow, accents */
-  --ml-red-bar: #da3049;       /* header bar: a touch deeper so white text clears 4.5:1 */
-  --ml-red-text: #d72b41;      /* red text on cream */
-  --ml-blue: #2ebde5;
-  --ml-twitter: #1da1f2;
-  --ml-yellow: #f6e15f;
-  --ml-text: #111;
-  --ml-cream: #fdfcf4;
-  --ml-grey-dark: #424242;
-  --ml-heading: "ML Patua One", "Rockwell", "Georgia", serif;
-  --ml-body: "ML Ubuntu Condensed", "Arial Narrow", sans-serif;
+  --ml-sky: #39b9e0;
+  --ml-sky-back: #26a7d7;
+  --ml-sky-front: #1295cb;
+  --ml-sun: #ffef66;
+  --ml-navy: #1a5296;
+  --ml-cloud: #fff;
+  --ml-red: #ef4a24;           /* sign lettering, the wordmark's red */
+  --ml-red-text: #c4361b;      /* small red text on white: 5:1 */
+  --ml-font: "ML Antonio", "Antonio", "Oswald", "Arial Narrow", sans-serif;
 
   container: meet-lolla / inline-size;
   position: relative;
@@ -27,41 +26,29 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  background-color: var(--ml-cream);
-  color: var(--ml-text);
-  font: 400 16px/1.5 var(--ml-heading);
+  background-color: var(--ml-sky);
+  color: var(--ml-navy);
+  font: 500 16px/1.4 var(--ml-font);
   font-kerning: normal;
-  font-feature-settings: "kern" 1;
   text-align: left;
   -webkit-text-size-adjust: 100%;
 }
 
-/* Reset: the host page's globals must not leak in (box-sizing, heading margins, link colours). */
+/* Reset: the host page's globals must not leak in. */
 .meet-lolla,
 .meet-lolla *,
 .meet-lolla *::before,
 .meet-lolla *::after {
-  box-sizing: content-box;
+  box-sizing: border-box;
 }
 .meet-lolla h1,
-.meet-lolla h4,
+.meet-lolla h2,
 .meet-lolla p {
-  margin: 0 0 15px;
+  margin: 0;
   padding: 0;
-  font-weight: 400;
-  letter-spacing: normal;
-  text-transform: none;
-}
-.meet-lolla h1,
-.meet-lolla h4 {
-  font-family: var(--ml-heading);
-}
-.meet-lolla h4 {
-  font-size: 16px;
-  line-height: 1.5;
-}
-.meet-lolla p {
-  font-family: var(--ml-body);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
 }
 .meet-lolla svg {
   display: block;
@@ -75,9 +62,22 @@
   background: none;
   color: inherit;
   font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.meet-lolla abbr {
+  text-decoration: none;
+  border: 0;
+}
+.meet-lolla a {
+  color: inherit;
+}
+.meet-lolla [hidden] {
+  display: none !important;
 }
 .meet-lolla .ml-sr {
   position: absolute;
@@ -91,195 +91,109 @@
   border: 0;
 }
 .meet-lolla :focus-visible {
-  outline: 3px solid var(--ml-text);
+  outline: 3px solid var(--ml-navy);
   outline-offset: 3px;
 }
-.meet-lolla .ml-header :focus-visible,
-.meet-lolla .ml-credit :focus-visible {
-  outline-color: var(--ml-cream);
-}
 
-/* Links: the animated underline from _base.scss */
-.meet-lolla a {
+/* ---- Header: sunburst behind a cloud bank; date, wordmark, place ---------------------- */
+.meet-lolla .ml-top {
+  --ct: clamp(14px, 2.5cqi, 40px);
+  --ch: clamp(110px, 15cqi, 240px);
   position: relative;
-  color: var(--ml-red-text);
-  text-decoration: none;
+  height: calc(var(--ct) + var(--ch));
 }
-.meet-lolla .ml-link {
-  transition: color 400ms ease;
-}
-.meet-lolla .ml-link::after {
+.meet-lolla .ml-sun,
+.meet-lolla .ml-clouds {
   position: absolute;
-  content: " ";
-  height: 2px;
-  width: 0%;
   left: 0;
-  bottom: -6px;
-  background-color: var(--ml-red);
-  transition: width 400ms ease;
-}
-.meet-lolla .ml-link:hover,
-.meet-lolla .ml-link:focus-visible {
-  color: var(--ml-text);
-}
-.meet-lolla .ml-link:hover::after,
-.meet-lolla .ml-link:focus-visible::after {
-  width: 100%;
-}
-.meet-lolla .ml-link-light:hover,
-.meet-lolla .ml-link-light:focus-visible {
-  color: var(--ml-cream);
-}
-.meet-lolla .ml-link-light::after {
-  background-color: var(--ml-cream);
-}
-.meet-lolla .ml-link-dark::after {
-  background-color: var(--ml-text);
-}
-
-.meet-lolla .ml-wrapper {
-  max-width: 740px;
-  margin: 0 auto;
-  padding: 0 30px;
-}
-.meet-lolla .ml-wrapper::after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-/* Header (_layout.scss) */
-.meet-lolla .ml-header {
-  position: relative;
-  min-height: 60px;
-  background: var(--ml-red-bar);
-}
-.meet-lolla .ml-header-top {
-  position: relative;
-  min-height: 60px;
-}
-.meet-lolla .ml-site-title {
-  float: left;
-  display: block;
-  width: 150px;
-  height: 60px;
-}
-.meet-lolla .ml-site-title img {
-  display: block;
-  width: 150px;
-  height: 60px;
-  max-width: none;
-  object-fit: contain;
-  object-position: left center;
-}
-.meet-lolla .ml-site-nav {
-  float: right;
-  margin-top: 16px;
-}
-.meet-lolla .ml-site-nav a {
-  color: #fff;
-}
-.meet-lolla .ml-mute {
-  position: absolute;
-  top: 0;
   right: 0;
+}
+.meet-lolla .ml-sun {
+  top: 0;
+  height: calc(var(--ct) + var(--ch) * 0.8);
+  color: var(--ml-sun);
+}
+.meet-lolla .ml-clouds {
+  top: var(--ct);
+  height: var(--ch);
+  color: var(--ml-cloud);
+}
+.meet-lolla .ml-sun svg,
+.meet-lolla .ml-clouds svg,
+.meet-lolla .ml-sky svg {
+  width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  border-left: 1px solid var(--ml-cream);
-}
-.meet-lolla .ml-header-sub-wrap {
-  background: var(--ml-grey-dark);
-}
-.meet-lolla .ml-header-sub {
-  display: flex;
-  justify-content: space-between;
-  max-width: 740px;
-  margin: 0 auto;
-  padding: 0 30px;
-}
-.meet-lolla .ml-header-sub h4 {
-  margin: 5px 0;
-  color: var(--ml-cream);
-}
-
-/* The CSS speaker (_play-btn.scss) */
-.meet-lolla .ml-sound-icon {
-  position: relative;
   overflow: hidden;
 }
-.meet-lolla .ml-sound-speaker {
-  display: flex;
+.meet-lolla .ml-masthead {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--ch) * 0.2);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  transform: translateX(15px);
-  overflow: hidden;
+  gap: 2cqi;
+  padding: 0 4.5cqi;
+  font-weight: 700;
+  font-size: clamp(14px, 2.6cqi, 40px);
+  line-height: 1.08;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ml-navy);
 }
-.meet-lolla .ml-sound-box {
-  width: 17px;
-  height: 15px;
-  background: var(--ml-cream);
-  border-radius: 2px;
+.meet-lolla .ml-when span,
+.meet-lolla .ml-where span {
+  display: block;
 }
-.meet-lolla .ml-sound-cone {
-  width: 23px;
-  height: 23px;
-  transform: rotate(45deg) translate(-7px, 7px);
-  background: var(--ml-cream);
-  border-radius: 2px;
+.meet-lolla .ml-where {
+  text-align: right;
 }
-.meet-lolla .ml-sound-cover {
-  display: flex;
-  align-items: center;
-  width: 20px;
-  height: 38px;
-  padding: 8px 5px;
-  transform: translate(-21px, 0);
-  background: var(--ml-red-bar);
-}
-.meet-lolla .ml-credit .ml-sound-cover {
-  background: var(--ml-grey-dark);
-}
-.meet-lolla .ml-sound-bar {
-  width: 4px;
-  height: 50%;
-  margin: 0 3px;
-  background: var(--ml-cream);
-  border-radius: 2px;
-  transition: all 400ms cubic-bezier(0.44, 0.09, 0.21, 1.27) 100ms;
-}
-.meet-lolla .ml-sound-bar:nth-child(2) {
-  height: 70%;
-}
-.meet-lolla.ml-is-muted .ml-sound-bar {
-  height: 60%;
-  margin: 0;
-  transform: rotate(45deg);
-  background: #f7a4ae;
-}
-.meet-lolla.ml-is-muted .ml-sound-bar:nth-child(1) {
-  transform: rotate(-45deg) translate(3px, 3px);
-}
-
-/* Page content: the cream sheet. The 2017 footer was fixed behind it and revealed on scroll;
-   embedded, it is a normal footer after the sheet. */
-.meet-lolla .ml-content {
-  position: relative;
-  z-index: 1;
-  padding: 30px 0 0;
-  background-color: var(--ml-cream);
-  box-shadow: 1px 2px 25px 5px rgba(100, 100, 150, 0.25), 1px 2px 35px 14px rgba(0, 0, 0, 0.1);
-}
-
-/* Logo (_logo.scss): letters pop in one after another */
 .meet-lolla .ml-logo {
-  max-width: 740px;
-  margin: 100px auto 0;
-  padding: 0 30px;
+  width: clamp(130px, 37cqi, 540px);
+  margin-bottom: calc(var(--ch) * -0.03);
 }
 .meet-lolla .ml-logo svg {
   width: 100%;
   height: auto;
 }
+/* "meet" is teal script in the mark; on the yellow sun it vanished. Navy with a white halo. */
+.meet-lolla .ml-logo-meet,
+.meet-lolla .ml-logo-meet path {
+  fill: var(--ml-navy);
+  stroke: #fff;
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.meet-lolla .ml-mute {
+  position: absolute;
+  z-index: 5;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--ml-navy);
+  box-shadow: 0 2px 0 rgba(26, 82, 150, 0.25);
+}
+.meet-lolla .ml-speaker {
+  width: 24px;
+  height: 24px;
+}
+.meet-lolla .ml-speaker-off,
+.meet-lolla.ml-is-muted .ml-speaker-on {
+  display: none;
+}
+.meet-lolla.ml-is-muted .ml-speaker-off {
+  display: inline;
+}
+
+/* Wordmark pop-in (the 2017 _logo.scss): letters appear one after another. */
 .meet-lolla .ml-logo-meet {
   opacity: 0;
   transform-origin: center left;
@@ -388,323 +302,429 @@
   100% { opacity: 1; transform: scale(1) translateY(0px); }
 }
 
-/* Chicago skyline (_chicago.scss). --ml-p (0..1) is the root's scroll over its first 900px,
-   replacing skrollr's data-0 / data-900 keyframes. */
-.meet-lolla .ml-chicago {
-  position: relative;
-}
-.meet-lolla .ml-chicago svg {
-  max-width: 640px;
-  width: 90%;
-  height: auto;
-  margin: 0 auto;
-  opacity: 0;
-  animation: ml-fade-up 600ms 400ms ease-out forwards 1;
-}
-@keyframes ml-fade-up {
-  0% { opacity: 0; transform: translateY(100px); }
-  100% { opacity: 1; transform: translateY(0px); }
-}
-
-/* Shuffle (_shuffle.scss) */
-.meet-lolla .ml-shuffle {
-  position: relative;
-  z-index: 100;
-  margin: 0 0 -60px;
-}
-.meet-lolla .ml-shuffle-date {
-  max-width: 800px;
-  margin: 0 auto;
-  transform: translateY(50px);
-}
-.meet-lolla .ml-shuffle-date h4 {
-  display: inline;
-  padding: 5px 10px;
-  color: var(--ml-text);
-  background: var(--ml-blue);
-}
-.meet-lolla .ml-shuffle-date a {
-  margin-left: 2px;
-}
-.meet-lolla .ml-shuffle-artist {
-  position: relative;
-  overflow: hidden;
-  padding: 50px 0;
-  transform: translateY(50px);
-}
-.meet-lolla .ml-shuffle-artist h1 {
-  margin: 0 0 15px;
-  text-align: center;
-  font-size: min(112px, 13.5cqi);
-  line-height: 1.5;
-  color: var(--ml-text);
-}
-.meet-lolla .ml-word {
-  display: inline-block;
-  white-space: nowrap;
-}
-.meet-lolla .ml-letter {
-  display: inline-block;
-  transform-origin: center bottom;
-}
-.meet-lolla .ml-shuffle-next {
-  width: 200px;
-  margin: 0 auto;
-  transform: translateY(-90px);
-  animation: ml-next-nudge 5s ease infinite;
-}
-.meet-lolla .ml-next {
-  display: block;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-}
-.meet-lolla .ml-next svg {
-  width: 200px;
-  height: 200px;
-}
-.meet-lolla .ml-next:focus-visible {
-  outline-color: var(--ml-red-text);
-}
-.meet-lolla .ml-hint {
-  margin: 0;
-  transform: translateY(-90px);
-  text-align: center;
-  font-family: var(--ml-heading);
-  font-size: 18px;
-  color: var(--ml-red-text);
-  transition: opacity 400ms ease;
-}
-.meet-lolla.ml-has-played .ml-hint {
-  opacity: 0;
-}
-.meet-lolla .ml-shuffle-next:has(.ml-next:hover) {
-  animation-play-state: paused;
-}
-@keyframes ml-next-nudge {
-  0%, 70%, 90%, 100% { transform: translateY(-90px) rotate(0deg); }
-  80% { transform: translateY(-90px) rotate(-20deg); }
-  95% { transform: translateY(-90px) rotate(-10deg); }
-}
-@keyframes ml-next-nudge-sm {
-  0%, 70%, 90%, 100% { transform: translateY(-45px) rotate(0deg); }
-  80% { transform: translateY(-45px) rotate(-20deg); }
-  95% { transform: translateY(-45px) rotate(-10deg); }
-}
-
-/* Visualizer (_visual.scss): a crowd of hands riding the frequency bars. In 2017 its box was
-   height:0 with overflow clipping, so it never showed; here it has room. */
-.meet-lolla .ml-visual {
-  position: relative;
-  height: 210px;
-  margin: 0 auto;
-  max-width: 1200px;
-  overflow: hidden;
-}
-.meet-lolla .ml-bar {
-  position: absolute;
-  bottom: 0;
-  width: 14px;
-  height: 0;
-  background-color: #ec9683;
-}
-.meet-lolla .ml-bar::before {
-  position: absolute;
-  width: 70px;
-  height: 70px;
-  transform: translateY(-68px) translateX(-27px);
-  content: "";
-  background-image: var(--ml-hand-1);
-  background-size: contain;
-  background-position: top left;
-  background-repeat: no-repeat;
-}
-.meet-lolla .ml-bar:nth-child(3),
-.meet-lolla .ml-bar:nth-child(19) {
-  background-color: #c66e34;
-}
-.meet-lolla .ml-bar:nth-child(3)::before,
-.meet-lolla .ml-bar:nth-child(19)::before {
-  width: 60px;
-  transform: translateY(-60px) translateX(-24px);
-  background-image: var(--ml-hand-2);
-}
-.meet-lolla .ml-bar:nth-child(4),
-.meet-lolla .ml-bar:nth-child(10),
-.meet-lolla .ml-bar:nth-child(18) {
-  background-color: #e3937c;
-}
-.meet-lolla .ml-bar:nth-child(4)::before,
-.meet-lolla .ml-bar:nth-child(10)::before,
-.meet-lolla .ml-bar:nth-child(18)::before {
-  width: 150px;
-  transform: translateY(-70px) translateX(-32px);
-  background-image: var(--ml-hand-3);
-}
-.meet-lolla .ml-bar:nth-child(1),
-.meet-lolla .ml-bar:nth-child(5),
-.meet-lolla .ml-bar:nth-child(13) {
-  background-color: #f6ba98;
-}
-.meet-lolla .ml-bar:nth-child(1)::before,
-.meet-lolla .ml-bar:nth-child(5)::before,
-.meet-lolla .ml-bar:nth-child(13)::before {
-  width: 100px;
-  transform: translateY(-70px) translateX(-25px);
-  background-image: var(--ml-hand-4);
-}
-.meet-lolla .ml-bar:nth-child(6),
-.meet-lolla .ml-bar:nth-child(16) {
-  background-color: #c66e34;
-}
-.meet-lolla .ml-bar:nth-child(6)::before,
-.meet-lolla .ml-bar:nth-child(16)::before {
-  width: 100px;
-  transform: translateY(-70px) translateX(-25px);
-  background-image: var(--ml-hand-5);
-}
-.meet-lolla .ml-bar:nth-child(7),
-.meet-lolla .ml-bar:nth-child(14) {
-  background-color: #c66e34;
-}
-.meet-lolla .ml-bar:nth-child(7)::before,
-.meet-lolla .ml-bar:nth-child(14)::before {
-  width: 100px;
-  transform: translateY(-70px) translateX(-33px);
-  background-image: var(--ml-hand-6);
-}
-.meet-lolla .ml-bar:nth-child(8),
-.meet-lolla .ml-bar:nth-child(12),
-.meet-lolla .ml-bar:nth-child(17) {
-  background-color: #e3937c;
-}
-.meet-lolla .ml-bar:nth-child(8)::before,
-.meet-lolla .ml-bar:nth-child(12)::before,
-.meet-lolla .ml-bar:nth-child(17)::before {
-  width: 60px;
-  transform: translateY(-60px) translateX(-24px);
-  background-image: var(--ml-hand-7);
-}
-
-/* Footer: was position:fixed behind the page; now static. */
-.meet-lolla .ml-footer {
+/* ---- Day tabs + shuffle -------------------------------------------------------------- */
+.meet-lolla .ml-bar-row {
   display: flex;
-  align-items: stretch;
-}
-.meet-lolla .ml-footer-item {
-  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  width: 50%;
-  min-height: 100px;
-  padding: 10px 20px;
+  gap: 10px 18px;
+  padding: 14px 16px 0;
 }
-.meet-lolla .ml-credit {
-  background: var(--ml-grey-dark);
+.meet-lolla .ml-tabs {
+  display: flex;
+  gap: 6px;
 }
-.meet-lolla .ml-credit p,
-.meet-lolla .ml-credit a {
-  margin: 0;
-  color: var(--ml-cream);
+.meet-lolla .ml-tab {
+  min-width: 56px;
+  min-height: 40px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ml-navy);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease, transform 150ms ease;
 }
-.meet-lolla .ml-about {
-  flex-direction: column;
-  gap: 4px;
-  background: var(--ml-twitter);
+.meet-lolla .ml-tab:hover {
+  background: #fffbd6;
+}
+.meet-lolla .ml-tab[aria-selected="true"] {
+  background: var(--ml-sun);
+  box-shadow: inset 0 -3px 0 var(--ml-navy);
+  transform: translateY(-1px);
+}
+.meet-lolla .ml-shuffle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 18px 4px 14px;
+  border-radius: 999px;
+  background: var(--ml-navy);
+  color: var(--ml-sun);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+  box-shadow: 0 3px 0 rgba(10, 40, 80, 0.3);
+  transition: transform 150ms ease;
+}
+.meet-lolla .ml-shuffle:hover {
+  transform: rotate(-2deg) scale(1.04);
+}
+.meet-lolla .ml-shuffle:active {
+  transform: rotate(-2deg) scale(0.97);
+}
+.meet-lolla .ml-shuffle svg {
+  width: 22px;
+  height: 22px;
+}
+.meet-lolla .ml-shuffle:focus-visible,
+.meet-lolla .ml-tab:focus-visible {
+  outline-color: #fff;
+}
+
+/* ---- Lineup: one day, rows sized and justified like the poster ------------------------- */
+.meet-lolla .ml-lineup {
+  --ml-base: 26px;
+  position: relative;
+  z-index: 1;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 6px clamp(16px, 4cqi, 48px) 0;
+  color: #fff;
+  text-align: center;
+  touch-action: pan-y;
+}
+.meet-lolla .ml-day {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0.35em 0 0.3em;
+  font-weight: 700;
+  font-size: calc(var(--ml-base) * 1.3);
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.meet-lolla .ml-day::before,
+.meet-lolla .ml-day::after {
+  content: "";
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--ml-sun);
+}
+.meet-lolla .ml-row {
+  --fs: 24px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 0.4em;
+  font-weight: 600;
+  font-size: var(--fs);
+  line-height: 1.22;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.meet-lolla .ml-row.ml-justify {
+  justify-content: space-between;
+}
+.meet-lolla .ml-row.ml-wrap {
+  flex-wrap: wrap;
+}
+.meet-lolla .ml-br {
+  flex-basis: 100%;
+  height: 0;
+}
+.meet-lolla .ml-dot-br {
+  display: none;
+}
+.meet-lolla .ml-measuring .ml-row {
+  width: max-content;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+.meet-lolla .ml-row-top {
+  font-weight: 700;
+  margin-bottom: 0.08em;
+}
+.meet-lolla .ml-row-also {
+  margin-top: 0.7em;
+  font-weight: 500;
+}
+.meet-lolla .ml-also-label {
+  color: var(--ml-sun);
+  margin-right: -0.1em;
+}
+.meet-lolla .ml-dot {
+  color: var(--ml-sun);
+  font-size: 0.8em;
+}
+.meet-lolla .ml-name {
+  position: relative;
+  padding: 0.04em 0;
+  color: #fff;
+  text-shadow: 0 1px 0 rgba(10, 60, 110, 0.18);
+  transition: color 150ms ease;
+}
+.meet-lolla button.ml-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.02em;
+  height: 0.09em;
+  border-radius: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform 200ms ease;
+}
+.meet-lolla .ml-name.ml-is-playing::after {
+  transform: scaleX(1);
+}
+@media (hover: hover) {
+  .meet-lolla button.ml-name:hover::after {
+    transform: scaleX(1);
+  }
+}
+.meet-lolla .ml-name.ml-is-playing {
+  color: var(--ml-sun);
+}
+.meet-lolla .ml-name-off {
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: none;
+}
+.meet-lolla button.ml-name:focus-visible {
+  outline-color: var(--ml-navy);
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
+/* ---- City: two skyline layers; they rise as they scroll into view (--ml-p 0..1) -------- */
+.meet-lolla .ml-stage {
+  --crowd-h: 262px;
+  --hr: 92px;
+  --sky-h: clamp(190px, 24cqi, 340px);
+  position: relative;
+  display: block;
+}
+.meet-lolla .ml-city {
+  --ml-p: 1;
+  position: relative;
+  height: calc(var(--sky-h) + var(--crowd-h) * 0.5);
+  margin-top: 28px;
+  overflow: hidden;
+}
+.meet-lolla .ml-sky {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  will-change: transform;
+}
+.meet-lolla .ml-sky-back {
+  height: calc(var(--sky-h) * 0.85 + var(--crowd-h) * 0.5);
+  color: var(--ml-sky-back);
+  transform: translateY(calc((1 - var(--ml-p)) * 90px));
+}
+.meet-lolla .ml-sky-front {
+  height: calc(var(--sky-h) * 0.45 + var(--crowd-h) * 0.5);
+  color: var(--ml-sky-front);
+  transform: translateY(calc((1 - var(--ml-p)) * 36px));
+}
+
+/* ---- Crowd: the visualiser, stuck to the bottom of the scroller ------------------------ */
+.meet-lolla .ml-crowd {
+  position: sticky;
+  z-index: 3;
+  bottom: 0;
+  height: var(--crowd-h);
+  margin-top: calc(var(--crowd-h) * -1);
+  pointer-events: none;
+}
+.meet-lolla .ml-visual {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+/* hands.md: the bar is the arm, ::before the hand. The tilt sits on the bar with its origin at
+   the bottom, so the visualiser only changes height. */
+.meet-lolla .ml-hand {
+  --s: var(--s0);
+  --bw: calc(var(--s) * 0.17);
+  position: absolute;
+  bottom: -6px;
+  left: var(--x);
+  z-index: var(--z, 1);
+  width: var(--bw);
+  height: calc(var(--h0) + var(--lvl, 0) * var(--hr));
+  margin-left: calc(var(--bw) / -2);
+  background: var(--arm);
+  transform: rotate(var(--tilt));
+  transform-origin: 50% 100%;
+  transition: height 90ms linear;
+}
+.meet-lolla .ml-hand::before {
+  content: "";
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  bottom: calc(100% - var(--s) * 0.02);
+  left: calc(50% - var(--s) * var(--wx));
+  background: var(--hand) top left / contain no-repeat;
+}
+
+/* The sign the crowd holds up, like the poster's @lollapalooza placard. */
+.meet-lolla .ml-sign {
+  position: absolute;
+  z-index: 6;
+  left: 6%;
+  bottom: 128px;
+  max-width: min(64cqi, 460px);
+  padding: 0.3em 0.65em 0.4em;
+  background: #fff;
+  color: var(--ml-red);
+  box-shadow: 0 3px 0 rgba(10, 40, 80, 0.22);
+  transform: rotate(-4deg);
+  transform-origin: 50% 100%;
+  animation: ml-sign-sway 3.2s ease-in-out infinite;
+  pointer-events: auto;
+}
+.meet-lolla .ml-sign-text {
+  font-weight: 700;
+  font-size: clamp(22px, 3cqi, 36px);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.meet-lolla .ml-youtube {
+  display: inline-block;
+  margin-top: 2px;
+  color: var(--ml-red-text);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.meet-lolla .ml-youtube:hover {
+  color: var(--ml-navy);
+}
+.meet-lolla .ml-youtube:focus-visible {
+  outline-offset: 2px;
+}
+@keyframes ml-sign-sway {
+  0%, 100% { transform: rotate(-4deg) translateY(0); }
+  50% { transform: rotate(-2.2deg) translateY(-3px); }
+}
+
+/* ---- Footer ------------------------------------------------------------------------- */
+.meet-lolla .ml-footer {
+  position: relative;
+  z-index: 4;
+  padding: 14px 16px 16px;
+  background: var(--ml-navy);
+  color: #fff;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.03em;
   text-align: center;
 }
-.meet-lolla .ml-about p {
-  margin: 0;
-  color: var(--ml-text);
+.meet-lolla .ml-footer a {
+  color: var(--ml-sun);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
-.meet-lolla .ml-about a {
-  color: var(--ml-text);
+.meet-lolla .ml-footer a + a,
+.meet-lolla .ml-footer p > a:last-child {
+  margin-left: 0.4em;
+}
+.meet-lolla .ml-footer :focus-visible {
+  outline-color: var(--ml-sun);
 }
 
-/* Laptop and below (was max-width: 800px / 880px) */
-@container meet-lolla (max-width: 880px) {
-  .meet-lolla .ml-site-nav {
-    margin-right: 65px;
+/* ---- Narrow containers (phones) ----------------------------------------------------- */
+@container meet-lolla (max-width: 600px) {
+  /* Phones: the cloud bank is cropped to its valley, so the header stacks: the wordmark on the
+     sun, and date + place as one line along the white cloud strip beneath it. */
+  .meet-lolla .ml-top {
+    --ct: 12px;
+    --ch: 132px;
   }
-}
-@container meet-lolla (max-width: 800px) {
-  .meet-lolla .ml-wrapper {
-    max-width: 770px;
-    padding: 0 15px;
-  }
-  .meet-lolla .ml-header-sub {
-    flex-direction: column;
-    justify-content: center;
-    max-width: 770px;
-    padding: 0 15px;
-    text-align: center;
+  .meet-lolla .ml-masthead {
+    inset: 0;
+    display: block;
+    padding: 0;
   }
   .meet-lolla .ml-logo {
-    max-width: 770px;
-    margin: 0 auto;
-    padding: 0 15px;
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--ch) * 0.25);
+    width: min(64cqi, 290px);
+    margin: 0;
+    transform: translateX(-50%);
   }
-  .meet-lolla .ml-bar:nth-child(odd) {
+  .meet-lolla .ml-when,
+  .meet-lolla .ml-where {
+    position: absolute;
+    top: calc(var(--ct) + var(--ch) * 0.825);
+    transform: translateY(-50%);
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .meet-lolla .ml-when {
+    left: 16px;
+  }
+  .meet-lolla .ml-where {
+    right: 16px;
+  }
+  .meet-lolla .ml-when span,
+  .meet-lolla .ml-where span {
+    display: inline;
+  }
+  .meet-lolla .ml-when-day::after {
+    content: ",";
+  }
+  .meet-lolla .ml-where span:first-child::after {
+    content: ",";
+  }
+  .meet-lolla .ml-mute {
+    top: 8px;
+    right: 8px;
+  }
+  .meet-lolla .ml-tab {
+    min-width: 0;
+    padding: 4px 12px;
+    font-size: 17px;
+  }
+  .meet-lolla .ml-stage {
+    --crowd-h: 214px;
+    --hr: 62px;
+  }
+  .meet-lolla .ml-hand {
+    --s: calc(var(--s0) * 0.82);
+  }
+  .meet-lolla .ml-hand[data-narrow="0"] {
     display: none;
   }
-}
-/* Palm (was max-width: 600px) */
-@container meet-lolla (max-width: 600px) {
-  .meet-lolla .ml-site-nav {
-    margin-top: 18px;
-    font-size: 15px;
+  .meet-lolla .ml-sign {
+    left: 4%;
+    bottom: 104px;
   }
-  .meet-lolla .ml-shuffle-date {
-    margin: 0 15px;
+  .meet-lolla .ml-sign-text {
+    font-size: 21px;
   }
-  .meet-lolla .ml-shuffle-artist h1 {
-    margin: 10px 15px;
-    font-size: min(80px, 17cqi);
-    line-height: 1em;
-  }
-  .meet-lolla .ml-shuffle-next {
-    transform: translateY(-50px);
-    animation-name: ml-next-nudge-sm;
-  }
-  .meet-lolla .ml-hint {
-    transform: translateY(-50px);
-  }
-  .meet-lolla .ml-shuffle {
-    margin-bottom: -20px;
-  }
-  .meet-lolla .ml-footer {
-    flex-direction: column-reverse;
-  }
-  .meet-lolla .ml-footer-item {
-    width: auto;
-  }
-}
-/* Parallax only on wide containers, as skrollr was only initialised above 600px. */
-@container meet-lolla (min-width: 601px) {
-  .meet-lolla .ml-chicago {
-    transform: translateY(calc(-100px + 300px * var(--ml-p, 0)));
-    opacity: calc(1 - var(--ml-p, 0));
-    will-change: transform, opacity;
+  .meet-lolla .ml-youtube {
+    font-size: 13px;
   }
 }
 
+/* ---- Reduced motion: no pop-in, no parallax, no sway; the crowd stands still ----------- */
 @media (prefers-reduced-motion: reduce) {
-  .meet-lolla .ml-logo svg *,
-  .meet-lolla .ml-chicago svg {
-    animation: none;
-    opacity: 1;
-  }
-  .meet-lolla .ml-chicago {
-    transform: none !important;
+  .meet-lolla .ml-logo svg * {
+    animation: none !important;
     opacity: 1 !important;
   }
-  .meet-lolla .ml-shuffle-next {
+  .meet-lolla .ml-sky {
+    transform: none !important;
+  }
+  .meet-lolla .ml-sign {
     animation: none;
   }
-  .meet-lolla .ml-link,
-  .meet-lolla .ml-link::after,
-  .meet-lolla .ml-sound-bar,
-  .meet-lolla .ml-hint {
+  .meet-lolla .ml-hand,
+  .meet-lolla .ml-tab,
+  .meet-lolla .ml-shuffle,
+  .meet-lolla .ml-name,
+  .meet-lolla .ml-name::after {
     transition: none;
   }
 }

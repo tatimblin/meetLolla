@@ -1,256 +1,425 @@
 // meet Lolla as an embeddable module: mount(el, { assetBase }) => { destroy() }.
 //
+// The 2017 Lollapalooza poster, as a player: one day of the lineup at a time (tabs), tap a name
+// to hear its 30s preview, shuffle across all four days, and the crowd of hands at the bottom is
+// the audio visualiser, holding up a "NOW: <ARTIST>" sign.
+//
 // Everything renders inside `el` under one .meet-lolla root that is its own scroller. Nothing
-// plays until a tap: the AudioContext is created on the first press of the play/next arrow.
-// destroy() is idempotent and leaves no listeners, timers, audio or DOM behind.
+// plays until a tap: the AudioContext is created on the first press of a name or Shuffle.
+// destroy() is idempotent and leaves no listeners, observers, timers, audio or DOM behind.
 import css from "../css/meet-lolla.css";
 import logoSvg from "../svg/logo.svg";
-import chicagoSvg from "../svg/chicago.svg";
-import nextSvg from "../svg/next.svg";
+import sunSvg from "../svg/poster/sunburst.svg";
+import cloudsSvg from "../svg/poster/clouds.svg";
+import skylineBackSvg from "../svg/poster/skyline-back.svg";
+import skylineFrontSvg from "../svg/poster/skyline-front.svg";
 import { artists } from "./artists.js";
+import { days } from "./lineup.js";
 
 const ADVANCE_MS = 30_000;   // each preview is a 30s clip
-const BAR_COUNT = 20;        // the 2017 visualiser: fftSize 64 -> 32 bins, 32 / 1.6 bars
-const PARALLAX_PX = 900;     // skrollr's data-0 .. data-900
+const SWIPE_PX = 60;
 
 const instances = new WeakMap();
+let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
 
-// anime.js 2's default easing (easeOutElastic, elasticity 500), sampled into CSS linear().
-function elasticEasing() {
-  const p = 0.5;
-  const elastic = (t) => t === 0 || t === 1 ? t
-    : -Math.pow(2, 10 * (t - 1)) * Math.sin(((t - 1 - (p / (Math.PI * 2)) * Math.asin(1)) * (Math.PI * 2)) / p);
-  const pts = [];
-  for (let i = 0; i <= 60; i++) pts.push(+(1 - elastic(1 - i / 60)).toFixed(4));
-  const value = `linear(${pts.join(", ")})`;
-  return typeof CSS !== "undefined" && CSS.supports?.("animation-timing-function", value)
-    ? value : "cubic-bezier(0.34, 1.56, 0.64, 1)";
-}
+// The crowd (src/svg/poster/hands/hands.md): [hand, left %, tilt deg, size px, z, rest height px,
+// kept on narrow screens]. Fixed, irregular positions so the crowd is the same on every load.
+const CROWD = [
+  ["h1b", 2.0, -14, 98, 2, 26, 1], ["claw", 5.6, 6, 112, 3, 38, 1], ["h2", 10.8, -4, 82, 1, 10, 0],
+  ["h5", 13.4, 10, 100, 2, 32, 1], ["h3b", 16.2, -8, 96, 1, 20, 0], ["h4", 23.8, 3, 104, 2, 42, 1],
+  ["h7", 27.0, 14, 84, 3, 14, 0], ["rock", 31.4, -6, 110, 4, 46, 1], ["h6b", 33.4, 9, 98, 2, 28, 0],
+  ["h1", 38.2, -16, 96, 1, 20, 1], ["h4", 45.8, 12, 98, 2, 36, 1], ["eye", 49.0, -3, 104, 3, 24, 0],
+  ["h2", 51.6, 8, 84, 4, 16, 1], ["h3", 57.2, -12, 100, 2, 40, 1], ["h5", 63.0, 4, 98, 1, 22, 0],
+  ["h7", 65.6, -9, 84, 3, 12, 1], ["h6", 68.4, 15, 100, 2, 34, 0], ["peace", 75.8, -10, 110, 3, 44, 1],
+  ["h1b", 79.6, 7, 96, 2, 26, 1], ["h4", 85.2, -5, 100, 1, 38, 0], ["h3b", 90.8, 11, 98, 2, 24, 1],
+  ["h5", 96.4, -18, 100, 3, 30, 1],
+];
+// hand -> [file under src/, wrist x as a fraction of the hand box, arm colour or arm tile file]
+const HANDS = {
+  h1: ["img/hand1.svg", 0.486, "#ec9683"], h1b: ["svg/poster/hands/hand1-band.svg", 0.486, "#ec9683"],
+  h2: ["img/hand2.svg", 0.517, "#c66e34"],
+  h3: ["img/hand3.svg", 0.557, "#e3937c"], h3b: ["svg/poster/hands/hand3-band.svg", 0.557, "#e3937c"],
+  h4: ["img/hand4.svg", 0.457, "#f6ba98"], h5: ["img/hand5.svg", 0.457, "#c66e34"],
+  h6: ["img/hand6.svg", 0.571, "#c66e34"], h6b: ["svg/poster/hands/hand6-band.svg", 0.571, "#8a4a22"],
+  h7: ["img/hand7.svg", 0.517, "#e3937c"],
+  claw: ["svg/poster/hands/hand-monster-claw.svg", 0.5, "svg/poster/hands/arm-claw.svg"],
+  rock: ["svg/poster/hands/hand-monster-rock.svg", 0.5, "svg/poster/hands/arm-rock.svg"],
+  eye: ["svg/poster/hands/hand-monster-eye.svg", 0.5, "svg/poster/hands/arm-eye.svg"],
+  peace: ["svg/poster/hands/hand-monster-peace.svg", 0.5, "svg/poster/hands/arm-peace.svg"],
+};
+// bar -> analyser bin (fftSize 64 gives 32 bins; an mp3 has little above bin 22). Scrambled so
+// the bass doesn't all land on the left of the crowd.
+const BINS = [3, 9, 15, 1, 12, 6, 19, 2, 10, 17, 5, 13, 21, 4, 8, 16, 11, 20, 7, 14, 18, 22];
 
-const fontFaces = (base) => `
-@font-face{font-family:"ML Patua One";src:url(${JSON.stringify(base + "assets/fonts/patua-one-latin.woff2")}) format("woff2");font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:"ML Ubuntu Condensed";src:url(${JSON.stringify(base + "assets/fonts/ubuntu-condensed-latin.woff2")}) format("woff2");font-weight:400;font-style:normal;font-display:swap}
-`;
+const bySlug = new Map(artists.map((a) => [a.slug, a]));
+const playable = days.flatMap((d) =>
+  [...d.rows.flat(), ...d.also].filter((e) => e.slug).map((e) => ({ ...e, day: d.id })));
 
-const speaker = `<span class="ml-sound-icon" aria-hidden="true"><span class="ml-sound-speaker"><span class="ml-sound-box"></span><span class="ml-sound-cone"></span><span class="ml-sound-cover"><span class="ml-sound-bar"></span><span class="ml-sound-bar"></span></span></span></span>`;
+const fontFaces = (base) => {
+  const src = (f) => `url(${JSON.stringify(base + "assets/fonts/" + f)}) format("woff2")`;
+  const face = (f, range) =>
+    `@font-face{font-family:"ML Antonio";src:${src(f)};font-weight:100 700;font-style:normal;font-display:swap;unicode-range:${range}}`;
+  return face("antonio-latin.woff2", "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD")
+    + face("antonio-latin-ext.woff2", "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF");
+};
 
-const markup = (base) => `
-<header class="ml-header">
-  <div class="ml-header-top">
-    <div class="ml-wrapper">
-      <span class="ml-site-title"><img src="${base}src/img/meet-lolla-logo.png" alt="meet Lolla" width="150" height="60"></span>
-      <nav class="ml-site-nav" aria-label="meet Lolla">
-        <a class="ml-link ml-link-light" href="https://en.wikipedia.org/wiki/List_of_Lollapalooza_lineups_by_year#2017" target="_blank" rel="noopener">2017 Lineup</a>
-      </nav>
-    </div>
-    <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speaker}</button>
+const speakerSvg = `<svg class="ml-speaker" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9.5h3.6L11.5 5v14l-4.9-4.5H3z" fill="currentColor"/><g class="ml-speaker-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 9.2a4 4 0 0 1 0 5.6"/><path d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/></g><g class="ml-speaker-off" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g></svg>`;
+const shuffleSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c4.5 0 6.5 10 11 10H21"/><path d="M3 17h3.5c1.8 0 3-1.6 4.1-3.5M13.4 10.5C14.5 8.6 15.7 7 17.5 7H21"/><path d="M18.5 4.5L21 7l-2.5 2.5M18.5 14.5L21 17l-2.5 2.5"/></svg>`;
+
+const markup = (uid) => `
+<header class="ml-top">
+  <div class="ml-sun" aria-hidden="true">${sunSvg}</div>
+  <div class="ml-clouds" aria-hidden="true">${cloudsSvg}</div>
+  <div class="ml-masthead">
+    <p class="ml-when"><span class="ml-when-day"></span> <span class="ml-when-date"></span></p>
+    <h1 class="ml-logo"><span class="ml-sr">meet Lollapalooza</span>${logoSvg}</h1>
+    <p class="ml-where"><span>Grant Park</span> <span>Chicago</span></p>
   </div>
-  <div class="ml-header-sub-wrap">
-    <div class="ml-header-sub">
-      <h4>Lollapalooza Festival</h4>
-      <h4>August 3-6, 2017</h4>
-      <h4>Grant Park, Chicago, IL</h4>
-    </div>
-  </div>
+  <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
 </header>
-<main class="ml-content">
-  <div class="ml-logo" role="img" aria-label="meet Lollapalooza">${logoSvg}</div>
-  <div class="ml-chicago" aria-hidden="true">${chicagoSvg}</div>
-  <section class="ml-shuffle" aria-label="Artist preview">
-    <div class="ml-shuffle-date">
-      <h4 class="ml-date"></h4> <a class="ml-link ml-youtube" target="_blank" rel="noopener">Full Song On Youtube</a>
+<main class="ml-stage">
+  <div class="ml-bar-row">
+    <div class="ml-tabs" role="tablist" aria-label="Festival day">${days.map((d) => `
+      <button type="button" role="tab" class="ml-tab" id="ml-tab-${uid}-${d.id}" data-day="${d.id}" aria-controls="ml-panel-${uid}" aria-label="${d.label}" aria-selected="false" tabindex="-1"><abbr title="${d.label}">${d.label.slice(0, 3)}</abbr></button>`).join("")}
     </div>
-    <div class="ml-shuffle-artist">
-      <h1 class="ml-artist" aria-live="polite"></h1>
+    <button type="button" class="ml-shuffle">${shuffleSvg}<span>Shuffle</span></button>
+  </div>
+  <section class="ml-lineup" id="ml-panel-${uid}" role="tabpanel"></section>
+  <div class="ml-city" aria-hidden="true">
+    <div class="ml-sky ml-sky-back">${skylineBackSvg}</div>
+    <div class="ml-sky ml-sky-front">${skylineFrontSvg}</div>
+  </div>
+  <div class="ml-crowd">
+    <div class="ml-sign">
+      <p class="ml-sign-text" aria-live="polite"></p>
+      <a class="ml-youtube" target="_blank" rel="noopener" hidden>Full song on YouTube</a>
     </div>
-    <div class="ml-shuffle-next">
-      <button type="button" class="ml-next" aria-label="Play">${nextSvg}</button>
-    </div>
-    <p class="ml-hint" aria-hidden="true">Tap to play</p>
-    <audio class="ml-audio" preload="none" crossorigin="anonymous"></audio>
-  </section>
-  <div class="ml-visual" aria-hidden="true">${
-    Array.from({ length: BAR_COUNT }, (_, i) => `<div class="ml-bar" style="left:${i * 5}%"></div>`).join("")
-  }</div>
+    <div class="ml-visual" aria-hidden="true"></div>
+  </div>
+  <audio class="ml-audio" preload="none" crossorigin="anonymous"></audio>
 </main>
 <footer class="ml-footer">
-  <div class="ml-footer-item ml-credit">
-    ${speaker}
-    <p>Site By <a class="ml-link ml-link-light" href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>. 2017</p>
-  </div>
-  <div class="ml-footer-item ml-about">
-    <p>Built June 2017 for Lollapalooza 2017. A school project.</p>
-    <p><a class="ml-link ml-link-dark" href="https://en.wikipedia.org/wiki/List_of_Lollapalooza_lineups_by_year#2017" target="_blank" rel="noopener">Lollapalooza 2017 lineup</a></p>
-  </div>
+  <p>Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017. A school project, restyled in 2026 after the official poster art.
+  <a href="https://en.wikipedia.org/wiki/List_of_Lollapalooza_lineups_by_year#2017" target="_blank" rel="noopener">Lollapalooza 2017 lineup</a></p>
 </footer>`;
 
+const el = (tag, cls, text) => {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text != null) node.textContent = text;
+  return node;
+};
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
 /**
- * @param {HTMLElement} el  a full-size box; meet Lolla fills it and scrolls inside it
+ * @param {HTMLElement} host  a full-size box; meet Lolla fills it and scrolls inside it
  * @param {{ assetBase?: string }} opts  repo root ending in "/", e.g.
  *   https://tatimblin.github.io/meetLolla/ ; media is ${assetBase}src/...
  * @returns {{ destroy(): void }}
  */
-export function mount(el, { assetBase = "" } = {}) {
-  if (!el) throw new Error("meet-lolla: mount(el) needs an element");
+export function mount(host, { assetBase = "" } = {}) {
+  if (!host) throw new Error("meet-lolla: mount(el) needs an element");
   if (assetBase && !assetBase.endsWith("/")) assetBase += "/";
-  instances.get(el)?.destroy();
+  instances.get(host)?.destroy();
 
   const ac = new AbortController();
   const { signal } = ac;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const easing = elasticEasing();
+  const still = () => reduceMotion.matches;
 
-  const root = document.createElement("div");
-  root.className = "meet-lolla";
-  for (let i = 1; i <= 7; i++) {
-    root.style.setProperty(`--ml-hand-${i}`, `url(${JSON.stringify(`${assetBase}src/img/hand${i}.svg`)})`);
-  }
+  const root = el("div", "meet-lolla");
   const style = document.createElement("style");
   style.textContent = fontFaces(assetBase) + css;
   root.append(style);
-  root.insertAdjacentHTML("beforeend", markup(assetBase));
-  el.append(root);
+  const uid = ++seq;
+  root.insertAdjacentHTML("beforeend", markup(uid));
+  host.append(root);
 
   const $ = (sel) => root.querySelector(sel);
   const audio = /** @type {HTMLAudioElement} */ ($(".ml-audio"));
-  const nextBtn = $(".ml-next");
   const muteBtn = $(".ml-mute");
-  const nameEl = $(".ml-artist");
-  const dateEl = $(".ml-date");
-  const linkEl = $(".ml-youtube");
-  const arrow = nextBtn.querySelector("svg");
-  const chicago = $(".ml-chicago");
-  const bars = [...root.querySelectorAll(".ml-bar")];
-  for (const svg of root.querySelectorAll(".ml-logo svg, .ml-chicago svg, .ml-next svg")) {
+  const shuffleBtn = $(".ml-shuffle");
+  const tabs = [...root.querySelectorAll(".ml-tab")];
+  const panel = $(".ml-lineup");
+  const whenDay = $(".ml-when-day");
+  const whenDate = $(".ml-when-date");
+  const signText = $(".ml-sign-text");
+  const linkEl = /** @type {HTMLAnchorElement} */ ($(".ml-youtube"));
+  const city = $(".ml-city");
+  const crowd = $(".ml-crowd");
+  const visual = $(".ml-visual");
+  for (const svg of root.querySelectorAll(".ml-logo svg, .ml-sun svg, .ml-clouds svg, .ml-city svg")) {
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("focusable", "false");
   }
 
-  let current = Math.max(0, artists.findIndex((a) => a.slug === "chance-the-rapper"));
-  let started = false;
+  // --- the crowd -----------------------------------------------------------------------
+  const src = (f) => `url(${JSON.stringify(assetBase + "src/" + f)})`;
+  const bars = CROWD.map(([k, x, tilt, size, z, h0, keep]) => {
+    const [hand, wx, arm] = HANDS[k];
+    const bar = el("div", "ml-hand");
+    bar.dataset.narrow = String(keep);
+    const set = (p, v) => bar.style.setProperty(p, v);
+    set("--x", `${x}%`); set("--tilt", `${tilt}deg`); set("--s0", `${size}px`); set("--wx", String(wx));
+    set("--z", String(z)); set("--h0", `${h0}px`); set("--hand", src(hand));
+    set("--arm", arm.startsWith("#") ? arm : `${src(arm)} 0 0 / 100% auto repeat-y`);
+    visual.append(bar);
+    return bar;
+  });
+
+  // --- state ---------------------------------------------------------------------------
+  let dayId = days[0].id;
+  /** @type {(typeof playable)[number] | null} */ let current = null;
   let destroyed = false;
   /** @type {AudioContext | null} */ let ctx = null;
   /** @type {AnalyserNode | null} */ let analyser = null;
   let freq = new Uint8Array(0);
-  let timer = 0, raf = 0, scrollRaf = 0, swapTimer = 0;
-  /** @type {Animation[]} */ let anims = [];
+  let timer = 0, raf = 0, scrollRaf = 0, fitRaf = 0;
 
-  // --- artist name, letter by letter ---------------------------------------------------
-  function showName(name, animate) {
-    for (const a of anims) a.cancel();
-    anims = [];
-    const sr = document.createElement("span");
-    sr.className = "ml-sr";
-    sr.textContent = name;
-    const visual = document.createElement("span");
-    visual.setAttribute("aria-hidden", "true");
-    const letters = [];
-    name.split(" ").forEach((word, w) => {
-      if (w) visual.append(" ");
-      const wordEl = document.createElement("span");
-      wordEl.className = "ml-word";
-      for (const ch of word) {
-        const l = document.createElement("span");
-        l.className = "ml-letter";
-        l.textContent = ch;
-        wordEl.append(l);
-        letters.push(l);
-      }
-      visual.append(wordEl);
+  // --- lineup --------------------------------------------------------------------------
+  function nameNode(entry) {
+    if (!entry.slug) return el("span", "ml-name ml-name-off", entry.name);
+    const b = el("button", "ml-name", entry.name);
+    b.type = "button";
+    b.dataset.slug = entry.slug;
+    return b;
+  }
+  function rowNode(entries, cls) {
+    const row = el("p", cls);
+    entries.forEach((e, i) => {
+      if (i) row.append(el("span", "ml-dot", "•"));
+      row.append(nameNode(e));
     });
-    nameEl.replaceChildren(sr, visual);
-    if (!animate) return;
-    letters.forEach((l, i) => {
-      anims.push(l.animate(
-        [
-          { transform: "translateY(120px) scale(0)", maxWidth: "0px", opacity: 0 },
-          { transform: "translateY(0) scale(1)", maxWidth: "1.2em", opacity: 1 },
-        ],
-        { duration: 700 + i * Math.random() * 500, easing, fill: "backwards" },
-      ));
-    });
-    anims.push(nameEl.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400 }));
+    for (const dot of row.querySelectorAll(".ml-dot")) dot.setAttribute("aria-hidden", "true");
+    return row;
   }
 
-  function render(i, animate) {
-    const a = artists[i];
-    dateEl.textContent = a.date;
-    linkEl.href = a.link;
-    linkEl.setAttribute("aria-label", `Full song by ${a.name} on YouTube`);
-    if (!animate) return showName(a.name, false);
-    // the 2017 fadeOut("fast") before the swap
-    const out = nameEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "forwards" });
-    anims.push(out);
-    clearTimeout(swapTimer);
-    swapTimer = setTimeout(() => { out.cancel(); showName(a.name, true); }, 200);
+  function renderDay() {
+    const day = days.find((d) => d.id === dayId);
+    whenDay.textContent = day.label;
+    whenDate.textContent = day.date;
+    for (const t of tabs) {
+      const on = t.dataset.day === dayId;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+    }
+    panel.setAttribute("aria-labelledby", `ml-tab-${uid}-${dayId}`);
+    const heading = el("h2", "ml-day");
+    heading.append(el("span", "", day.label));
+    const rows = day.rows.map((r, i) => rowNode(r, i ? "ml-row" : "ml-row ml-row-top"));
+    const nodes = [heading, ...rows];
+    if (day.also.length) {
+      const also = rowNode(day.also, "ml-row ml-row-also");
+      also.prepend(el("span", "ml-also-label", "Also:"));
+      nodes.push(also);
+    }
+    panel.replaceChildren(...nodes);
+    markPlaying();
+    fitNow();   // before paint, so a new day never flashes unfitted rows
+  }
+
+  function markPlaying() {
+    for (const b of panel.querySelectorAll("button.ml-name")) {
+      const on = !!current && b.dataset.slug === current.slug;
+      b.classList.toggle("ml-is-playing", on);
+      if (on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current");
+    }
+  }
+
+  // Rows are sized like the poster: a day shares one base size, chosen so its rows fit the
+  // width (each may grow a little to fill); a row that nearly fills it is justified, shorter
+  // ones are centred, and on narrow screens a row that would get too small is split into
+  // balanced lines. Widths scale linearly with font size: one measurement per row suffices.
+  function fit() {
+    if (destroyed || fitRaf) return;
+    fitRaf = requestAnimationFrame(() => { fitRaf = 0; fitNow(); });
+  }
+  function fitNow() {
+    const rows = [...panel.querySelectorAll(".ml-row")];
+    const cs = getComputedStyle(panel);
+    const W = panel.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (!rows.length || W <= 0) return;
+    const REF = 20;
+    for (const br of panel.querySelectorAll(".ml-br")) br.remove();
+    for (const d of panel.querySelectorAll(".ml-dot-br")) d.classList.remove("ml-dot-br");
+    panel.classList.add("ml-measuring");
+    for (const r of rows) r.style.setProperty("--fs", `${REF}px`);
+    const k = rows.map((r) => r.scrollWidth / REF);
+    // each child's left edge, in em
+    const parts = rows.map((r) => {
+      const x0 = r.getBoundingClientRect().left;
+      return [...r.children].map((c) => ({ c, x: (c.getBoundingClientRect().left - x0) / REF }));
+    });
+    panel.classList.remove("ml-measuring");
+    const isTop = (r) => r.classList.contains("ml-row-top");
+    const isAlso = (r) => r.classList.contains("ml-row-also");
+    const minFit = Math.min(...rows.filter((r) => !isTop(r) && !isAlso(r)).map((r) => W / k[rows.indexOf(r)]));
+    const base = clamp(minFit, W < 520 ? 17 : 18, 34);
+    rows.forEach((r, i) => {
+      let fs = clamp(W / k[i], base, base * 1.18);   // rows may grow a little to fill, like the poster
+      if (isTop(r)) fs = clamp(W / k[i], base * 1.15, base * 1.6);
+      if (isAlso(r)) fs = Math.max(15, base * 0.72);
+      const fill = (k[i] * fs) / W;
+      r.style.setProperty("--fs", `${fs.toFixed(2)}px`);
+      r.classList.toggle("ml-wrap", fill > 1.001);
+      r.classList.toggle("ml-justify", fill <= 1.001 && fill > 0.8 && !isAlso(r));
+      if (fill > 1.001) breakRow(r, parts[i], k[i], Math.ceil(fill / 0.97));
+    });
+    panel.style.setProperty("--ml-base", `${base.toFixed(2)}px`);
+  }
+
+  // Split a row that is too wide into `lines` balanced, centred lines, breaking at bullets
+  // (the bullet at a break is hidden) rather than letting flex-wrap leave a dangling bullet.
+  function breakRow(row, items, total, lines) {
+    const dots = items.filter((p) => p.c.classList.contains("ml-dot"));
+    let prev = -Infinity;
+    for (let m = 1; m < lines; m++) {
+      const target = (total * m) / lines;
+      let best = null;
+      for (const d of dots) {
+        if (d.x <= prev) continue;
+        if (!best || Math.abs(d.x - target) < Math.abs(best.x - target)) best = d;
+      }
+      if (!best) break;
+      prev = best.x;
+      best.c.classList.add("ml-dot-br");
+      best.c.after(el("span", "ml-br"));
+    }
+  }
+
+  function selectDay(id, { focus = false } = {}) {
+    if (id !== dayId) {
+      dayId = id;
+      renderDay();
+    }
+    if (focus) tabs.find((t) => t.dataset.day === id)?.focus();
   }
 
   // --- audio ---------------------------------------------------------------------------
   function ensureGraph() {
-    if (ctx) return;
-    const AC = window.AudioContext || /** @type {any} */ (window).webkitAudioContext;
-    if (!AC) return;
-    ctx = new AC();
-    const source = ctx.createMediaElementSource(audio);   // exactly once per <audio>
-    analyser = ctx.createAnalyser();
-    analyser.fftSize = 64;
-    freq = new Uint8Array(analyser.frequencyBinCount);
-    source.connect(analyser);
-    analyser.connect(ctx.destination);
+    if (!ctx) {
+      const AC = window.AudioContext || /** @type {any} */ (window).webkitAudioContext;
+      if (!AC) return;
+      ctx = new AC();
+      const source = ctx.createMediaElementSource(audio);   // exactly once per <audio>
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 64;
+      analyser.smoothingTimeConstant = 0.7;
+      freq = new Uint8Array(analyser.frequencyBinCount);
+      source.connect(analyser);
+      analyser.connect(ctx.destination);
+    }
+    ctx.resume().catch(() => {});
   }
 
-  function play(i) {
-    current = i;
-    const animate = !reduceMotion.matches;
-    render(i, animate);
-    if (animate) {
-      anims.push(arrow.animate(
-        [{ transform: "rotate(0deg)" }, { transform: "rotate(-720deg)" }],
-        { duration: 3000, easing },
-      ));
+  function play(entry) {
+    current = entry;
+    root.classList.add("ml-has-played");
+    const info = bySlug.get(entry.slug);
+    signText.textContent = `Now: ${entry.name}`;
+    if (info) {
+      linkEl.href = info.link;
+      linkEl.setAttribute("aria-label", `Full song by ${entry.name} on YouTube`);
+      linkEl.hidden = false;
     }
-    audio.src = `${assetBase}src/audio/${encodeURIComponent(artists[i].slug)}.mp3`;
+    markPlaying();
+    audio.src = `${assetBase}src/audio/${encodeURIComponent(entry.slug)}.mp3`;
     audio.play().catch(() => { /* aborted by the next tap, or blocked; the next tap retries */ });
     restartTimer();
   }
 
-  function next() {
-    if (artists.length < 2) return play(0);
-    let i;
-    do i = Math.floor(Math.random() * artists.length); while (i === current);
-    play(i);
+  function pickRandom() {
+    let e;
+    do e = playable[Math.floor(Math.random() * playable.length)];
+    while (playable.length > 1 && e === current);
+    return e;
+  }
+
+  // Bring the playing name into view inside the root (never scrollIntoView: it would scroll
+  // the host page too), above the crowd that covers the bottom of the scroller.
+  function reveal(slug) {
+    const b = panel.querySelector(`button.ml-name[data-slug="${CSS.escape(slug)}"]`);
+    if (!b) return;
+    const r = root.getBoundingClientRect();
+    const box = b.getBoundingClientRect();
+    const top = box.top - r.top;
+    const bottomLimit = root.clientHeight - crowd.offsetHeight * 0.75;
+    if (top >= 8 && box.bottom - r.top <= bottomLimit) return;
+    root.scrollTo({
+      top: Math.max(0, root.scrollTop + top - Math.max(8, (bottomLimit - box.height) / 2)),
+      behavior: still() ? "auto" : "smooth",
+    });
+  }
+
+  function shuffle({ follow = true } = {}) {
+    const prevDay = current?.day;
+    const e = pickRandom();
+    // Auto-advance only moves the tabs when the listener is following the music: they are on
+    // the playing day and not keyboard-focused inside the lineup.
+    const move = follow || (dayId === prevDay && !panel.contains(document.activeElement));
+    if (move) selectDay(e.day);
+    play(e);
+    if (follow) reveal(e.slug);
   }
 
   function restartTimer() {
     clearInterval(timer);
-    timer = setInterval(next, ADVANCE_MS);
+    timer = setInterval(() => shuffle({ follow: false }), ADVANCE_MS);
   }
 
   function frame() {
     raf = requestAnimationFrame(frame);
     if (!analyser) return;
     analyser.getByteFrequencyData(freq);
-    for (let i = 0; i < bars.length; i++) bars[i].style.height = `${freq[i] / 2}px`;
+    for (let i = 0; i < bars.length; i++) {
+      const b = BINS[i];
+      const lvl = Math.min(1, (freq[b] / 255) * (1 + b / 30));
+      bars[i].style.setProperty("--lvl", (lvl * lvl).toFixed(3));
+    }
   }
-  function startBars() { if (!raf) raf = requestAnimationFrame(frame); }
+  // Reduced motion: the crowd stays still.
+  function startBars() { if (!raf && !still()) raf = requestAnimationFrame(frame); }
   function stopBars() {
     cancelAnimationFrame(raf);
     raf = 0;
-    for (const b of bars) b.style.height = "";
+    for (const b of bars) b.style.removeProperty("--lvl");
   }
 
-  nextBtn.addEventListener("click", () => {
+  // --- events --------------------------------------------------------------------------
+  panel.addEventListener("click", (ev) => {
+    const b = /** @type {HTMLElement} */ (ev.target).closest?.("button.ml-name");
+    if (!b) return;
+    const entry = playable.find((e) => e.slug === b.dataset.slug);
+    if (!entry) return;
     ensureGraph();
-    ctx?.resume().catch(() => {});
-    if (!started) {
-      started = true;
-      root.classList.add("ml-has-played");
-      nextBtn.setAttribute("aria-label", "Next artist");
-      play(current);      // the first tap plays the artist already on screen
-    } else {
-      next();
-    }
+    play(entry);
   }, { signal });
+
+  shuffleBtn.addEventListener("click", () => { ensureGraph(); shuffle(); }, { signal });
+
+  for (const t of tabs) t.addEventListener("click", () => selectDay(t.dataset.day), { signal });
+  $(".ml-tabs").addEventListener("keydown", (ev) => {
+    const i = tabs.findIndex((t) => t.dataset.day === dayId);
+    const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[ev.key];
+    if (to == null) return;
+    ev.preventDefault();
+    selectDay(tabs[(to + tabs.length) % tabs.length].dataset.day, { focus: true });
+  }, { signal });
+
+  // Swipe between days on touch screens.
+  let touch = null;
+  panel.addEventListener("touchstart", (ev) => {
+    touch = ev.touches.length === 1 ? { x: ev.touches[0].clientX, y: ev.touches[0].clientY } : null;
+  }, { passive: true, signal });
+  panel.addEventListener("touchend", (ev) => {
+    if (!touch) return;
+    const t = ev.changedTouches[0];
+    const dx = t.clientX - touch.x, dy = t.clientY - touch.y;
+    touch = null;
+    if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const i = days.findIndex((d) => d.id === dayId) + (dx < 0 ? 1 : -1);
+    if (i >= 0 && i < days.length) selectDay(days[i].id);
+  }, { passive: true, signal });
 
   function setMuted(m) {
     audio.muted = m;
@@ -259,34 +428,43 @@ export function mount(el, { assetBase = "" } = {}) {
   }
   muteBtn.addEventListener("click", () => setMuted(!audio.muted), { signal });
   // leaving for the full song: hush the preview (2017 behaviour)
-  linkEl.addEventListener("click", () => { if (started) setMuted(true); }, { signal });
+  linkEl.addEventListener("click", () => setMuted(true), { signal });
 
   audio.addEventListener("playing", startBars, { signal });
   audio.addEventListener("pause", stopBars, { signal });
   audio.addEventListener("ended", stopBars, { signal });
+  reduceMotion.addEventListener?.("change", () => {
+    if (still()) stopBars(); else if (!audio.paused) startBars();
+  }, { signal });
 
-  // --- parallax: the root is the scroller ---------------------------------------------
+  // --- parallax: the root is the scroller; the skyline rises as it scrolls into view -------
   function applyScroll() {
     scrollRaf = 0;
-    const p = Math.min(1, Math.max(0, root.scrollTop / PARALLAX_PX));
-    chicago.style.setProperty("--ml-p", p.toFixed(4));
+    const view = root.scrollTop + root.clientHeight;
+    const p = clamp((view - city.offsetTop) / (city.offsetHeight + crowd.offsetHeight * 0.5), 0, 1);
+    city.style.setProperty("--ml-p", p.toFixed(4));
   }
-  root.addEventListener("scroll", () => {
-    if (!scrollRaf && !reduceMotion.matches) scrollRaf = requestAnimationFrame(applyScroll);
-  }, { passive: true, signal });
+  const onScroll = () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); };
+  root.addEventListener("scroll", onScroll, { passive: true, signal });
 
-  render(current, false);
+  const ro = new ResizeObserver(() => { fit(); onScroll(); });
+  ro.observe(panel);
+  // Row widths depend on the font: refit once it has loaded.
+  document.fonts?.load('600 20px "ML Antonio"').then(() => { if (!destroyed) { fit(); onScroll(); } }, () => {});
+
+  signText.textContent = "Tap a name";
+  renderDay();
 
   const instance = {
     destroy() {
       if (destroyed) return;
       destroyed = true;
       ac.abort();
+      ro.disconnect();
       clearInterval(timer);
-      clearTimeout(swapTimer);
       cancelAnimationFrame(raf);
       cancelAnimationFrame(scrollRaf);
-      for (const a of anims) a.cancel();
+      cancelAnimationFrame(fitRaf);
       audio.pause();
       audio.removeAttribute("src");
       audio.load();
@@ -294,10 +472,10 @@ export function mount(el, { assetBase = "" } = {}) {
       ctx = null;
       analyser = null;
       root.remove();
-      if (instances.get(el) === instance) instances.delete(el);
+      if (instances.get(host) === instance) instances.delete(host);
     },
   };
-  instances.set(el, instance);
+  instances.set(host, instance);
   return instance;
 }
 
