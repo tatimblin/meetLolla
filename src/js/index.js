@@ -136,7 +136,7 @@ const markup = (uid) => `
   <div class="ml-sky ml-sky-front">${skylineFrontSvg}</div>
 </div>
 <div class="ml-crowd">
-  <div class="ml-visual" aria-hidden="true"><div class="ml-crowd-shadow">${crowdShadowSvg}</div></div>
+  <div class="ml-visual" aria-hidden="true"><div class="ml-sign">@lollapalooza</div><div class="ml-crowd-shadow">${crowdShadowSvg}</div></div>
   <div class="ml-player" role="region" aria-label="Player">
     <div class="ml-controls">
       <button type="button" class="ml-shuffle">${shuffleSvg}<span>Shuffle</span></button>
