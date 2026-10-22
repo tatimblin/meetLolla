@@ -153,10 +153,12 @@ const markup = (uid) => `
       <a class="ml-youtube" target="_blank" rel="noopener" hidden>Full song on YouTube</a>
       <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
     </div>
-    <p class="ml-credit">Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017 · a school project, restyled in 2026 after the official poster.</p>
   </div>
   <audio class="ml-audio" preload="none" crossorigin="anonymous"></audio>
-</div>`;
+</div>
+<footer class="ml-foot">
+  <p class="ml-credit">Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017 · a school project, restyled in 2026 after the official poster.</p>
+</footer>`;
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);

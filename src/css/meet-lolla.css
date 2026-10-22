@@ -568,14 +568,11 @@
   bottom: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "controls np extras"
-    "credit credit credit";
-  grid-template-rows: 1fr auto;
+  grid-template-areas: "controls np extras";
   align-items: center;
   column-gap: clamp(14px, 2.4cqi, 32px);
   height: var(--bar-h);
-  padding: 8px clamp(16px, 3cqi, 40px) 4px;
+  padding: 4px clamp(16px, 3cqi, 40px) 0;
   border-top: 4px solid var(--ml-sun);
   background: var(--ml-navy);
   color: #fff;
@@ -754,9 +751,16 @@
 .meet-lolla .ml-youtube:hover {
   color: var(--ml-sun);
 }
+/* The credit isn't part of the pinned bar: it sits in the page flow after the sticky crowd,
+   so the bar rides up off it only once the page is scrolled to the very end. */
+.meet-lolla .ml-foot {
+  position: relative;
+  z-index: 6;
+  padding: 2px clamp(16px, 3cqi, 40px) 10px;
+  background: var(--ml-navy);
+  text-align: right;
+}
 .meet-lolla .ml-credit {
-  grid-area: credit;
-  justify-self: end;
   color: rgba(255, 255, 255, 0.72);
   font-size: 11px;
   letter-spacing: 0.04em;
@@ -855,21 +859,20 @@
   }
   .meet-lolla .ml-city,
   .meet-lolla .ml-crowd {
-    --bar-h: 152px;
+    --bar-h: 132px;
   }
   .meet-lolla .ml-hand[data-narrow="0"] {
     display: none;
   }
-  /* Player on phones: now playing + progress on top, controls below, credit underneath. */
+  /* Player on phones: now playing + progress on top, controls below. */
   .meet-lolla .ml-player {
     grid-template-columns: auto minmax(0, 1fr);
     grid-template-areas:
       "np np"
-      "controls extras"
-      "credit credit";
-    grid-template-rows: auto auto auto;
+      "controls extras";
+    grid-template-rows: auto auto;
     row-gap: 4px;
-    padding: 8px 16px 5px;
+    padding: 8px 16px;
   }
   .meet-lolla .ml-np-name {
     font-size: 20px;
@@ -887,10 +890,12 @@
   .meet-lolla .ml-shuffle {
     font-size: 17px;
   }
-  .meet-lolla .ml-credit {
-    justify-self: center;
-    font-size: 10.5px;
+  .meet-lolla .ml-foot {
+    padding-inline: 16px;
     text-align: center;
+  }
+  .meet-lolla .ml-credit {
+    font-size: 10.5px;
   }
 }
 
