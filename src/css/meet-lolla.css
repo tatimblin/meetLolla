@@ -531,7 +531,7 @@
   position: absolute;
   z-index: 0;
   left: 8%;
-  bottom: calc(172 * var(--u));
+  bottom: calc(205 * var(--u));
   padding: calc(4 * var(--u)) calc(26 * var(--u)) calc(14 * var(--u));
   background: #fff;
   color: #ef4a24;
