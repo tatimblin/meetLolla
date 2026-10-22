@@ -20,6 +20,8 @@ import { CROWD, HANDS, BINS } from "./crowd.js";
 
 const PREVIEW_S = 30;   // each preview plays for up to 30s, then the next artist
 const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this long of the user scrolling
+const HAND_RISE_MS = 70;    // hands rise toward a louder level with this time constant...
+const HAND_FALL_MS = 260;   // ...and fall back more slowly, so beats read as bobs, not jitter
 
 const instances = new WeakMap();
 let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
@@ -509,24 +511,41 @@ export function mount(host, { assetBase = "" } = {}) {
   }
 
   // While paused the loop keeps running only until the playing name has settled.
+  // Hands ease toward the music rather than jumping to each frame's level: a quick rise on a
+  // beat, a slower fall after it, so they bob instead of jitter. Paused, they sink back to rest.
+  const lvls = new Float32Array(bars.length);
+  let lastT = 0;
+  function easeBars(t, live) {
+    const dt = lastT ? Math.min(100, t - lastT) : 16;
+    lastT = t;
+    const up = 1 - Math.exp(-dt / HAND_RISE_MS), down = 1 - Math.exp(-dt / HAND_FALL_MS);
+    let moving = false;
+    for (let i = 0; i < bars.length; i++) {
+      if (bars[i].hidden) continue;   // past the screen edges (sizeCrowd)
+      const b = BINS[i];
+      const raw = live ? Math.min(1, (freq[b] / 255) * (1 + b / 30)) : 0;
+      const target = raw * raw;
+      const prev = lvls[i];
+      const next = prev + (target - prev) * (target > prev ? up : down);
+      lvls[i] = next < 0.002 && !live ? 0 : next;
+      if (lvls[i] > 0) moving = true;
+      if (Math.abs(lvls[i] - prev) > 0.001 || lvls[i] === 0) bars[i].style.setProperty("--lvl", lvls[i].toFixed(3));
+    }
+    return moving;
+  }
   function frame(t) {
     raf = requestAnimationFrame(frame);
     if (!analyser) return;
     const live = !audio.paused;
     analyser.getByteFrequencyData(freq);
-    if (live) {
-      for (let i = 0; i < bars.length; i++) {
-        if (bars[i].hidden) continue;   // past the screen edges (sizeCrowd)
-        const b = BINS[i];
-        const lvl = Math.min(1, (freq[b] / 255) * (1 + b / 30));
-        bars[i].style.setProperty("--lvl", (lvl * lvl).toFixed(3));
-      }
-    }
-    if (!danceFrame(t, live) && !live) { cancelAnimationFrame(raf); raf = 0; }
+    const moving = easeBars(t, live);
+    if (!danceFrame(t, live) && !live && !moving) { cancelAnimationFrame(raf); raf = 0; lastT = 0; }
   }
   // Reduced motion: the crowd stays still and the playing name only grows.
   function startBars() { if (!raf && !still()) raf = requestAnimationFrame(frame); }
   function stopBars() {
+    lvls.fill(0);
+    lastT = 0;
     for (const b of bars) b.style.removeProperty("--lvl");
   }
 
@@ -572,13 +591,14 @@ export function mount(host, { assetBase = "" } = {}) {
   linkEl.addEventListener("click", () => setMuted(true), { signal });
 
   audio.addEventListener("playing", () => { setPlayButton(true); startBars(); }, { signal });
-  audio.addEventListener("pause", () => { setPlayButton(false); stopBars(); }, { signal });
+  // paused: the loop keeps running until the hands have sunk back to rest
+  audio.addEventListener("pause", () => { setPlayButton(false); startBars(); }, { signal });
   audio.addEventListener("timeupdate", () => {
     showProgress(audio.currentTime);
     if (audio.currentTime >= PREVIEW_S) advance();
   }, { signal });
   audio.addEventListener("loadedmetadata", () => showProgress(audio.currentTime), { signal });
-  audio.addEventListener("ended", () => { stopBars(); advance(); }, { signal });
+  audio.addEventListener("ended", () => advance(), { signal });
   // a clip that fails to load (404, network) would otherwise stall the shuffle for good; after a
   // few failures in a row (offline) stop trying until something plays
   let failures = 0;
