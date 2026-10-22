@@ -23,14 +23,13 @@ const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this 
 const instances = new WeakMap();
 let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
 
-// The crowd, as dense as the poster's: about 34 big hands across, packed edge to edge and
-// overlapping, in two rows, mostly just hand and wristband with the arms cut off low. The back
-// row is a little smaller and stands a little higher; the crowd shadow fills in behind them.
-// Positions, sizes and rest heights are irregular but come from a fixed seed, so the crowd is
-// identical on every load. Rows: [hand, left %, tilt deg, size, z, rest height, kept on narrow
-// screens]; size and rest height are in reference px (the crowd at 1440 wide), scaled by --u in
-// the CSS. About one human hand in eight leans, 3-5 degrees; monsters never lean, and about
-// one hand in seven is a monster, never two side by side.
+// The crowd, as dense as the poster's: big hands packed edge to edge and overlapping, in two
+// rows, mostly just hand and wristband with the arms cut off low. The back row is a little
+// smaller and stands a little higher; the crowd shadow fills in behind them. Positions, sizes
+// and rest heights are irregular but come from a fixed seed, so the crowd is identical on every
+// load. Rows: [hand, x from the page centre, tilt deg, size, z, rest height]; x, size and rest
+// height are in reference px, scaled by --u. About one human hand in eight leans, 3-5 degrees;
+// monsters never lean, and about one hand in six is a monster, never two side by side.
 const CROWD = (() => {
   let seed = 20170803;
   const rnd = () => {   // mulberry32
@@ -42,34 +41,43 @@ const CROWD = (() => {
   // fists, peace and rock signs dominate, as in the poster; an open palm now and then
   const humans = ["h2", "h1", "h3b", "h7", "h6", "h1b", "h4", "h2", "h3", "h6b", "h7", "h1", "h5"];
   const small = new Set(["h2", "h7"]);   // fists read bigger, so draw them a little smaller
+  // A strip much wider than any screen, centred on the page: a screen shows the middle of it
+  // and hands load in or drop out at the edges as it resizes (see sizeCrowd). Pitch is in
+  // reference px; monsters come every few hands in the front row, cycling, never side by side.
+  const HALF = 2400;
+  const cycle = ["rock", "eye", "peace", "claw"];
   const rows = [
-    // count, size range, rest height range, z range, monster slots, which to keep on phones
-    { n: 20, s: [228, 252], h: [0, 26], z: [3, 5], monsters: { 2: "claw", 7: "rock", 12: "eye", 17: "peace" }, keep: (i) => ![1, 4, 6, 9, 12, 14, 16, 19].includes(i) },
-    { n: 14, s: [206, 228], h: [24, 62], z: [1, 2], monsters: { 6: "claw" }, keep: (i) => i % 4 === 1 },
+    // pitch, size range, rest height range, z range, a monster every n (offset), back row: claws only
+    { pitch: 72, s: [228, 252], h: [0, 26], z: [3, 5], every: 5, off: 2 },
+    { pitch: 103, s: [206, 228], h: [24, 62], z: [1, 2], every: 14, off: 6, only: "claw" },
   ];
   const out = [];
   let h = 0;
   rows.forEach((row, r) => {
-    const pitch = 100 / row.n;
-    for (let i = 0; i < row.n; i++) {
-      const x = clampN((i + 0.5) * pitch + (rnd() - 0.5) * pitch * (r ? 0.7 : 0.55) + (r ? pitch * 0.25 : 0), 1, 99);
-      let kind = row.monsters[i];
+    const { pitch } = row;
+    const n = Math.ceil((2 * HALF) / pitch);
+    const mid = Math.floor(n / 2);
+    for (let i = 0; i < n; i++) {
+      const x = -HALF + (i + 0.5) * pitch + (rnd() - 0.5) * pitch * (r ? 0.7 : 0.55) + (r ? pitch * 0.25 : 0);
+      // monster slots count from the middle, so the centre looks the same at any width
+      const slot = i - mid - row.off;
+      const monster = slot % row.every === 0 ? row.only ?? cycle[((slot / row.every) % 4 + 4) % 4] : null;
+      let kind = monster;
       if (!kind) { kind = humans[h % humans.length]; h += 1 + (rnd() < 0.3 ? 1 : 0); }
       const lo = row.s[0], hi = row.s[1];
       let size = lo + rnd() * (hi - lo);
       if (small.has(kind)) size *= 0.86;
-      if (row.monsters[i]) size *= 1.06;
-      const leans = rnd() < 0.09 && !row.monsters[i];
+      if (monster) size *= 1.06;
+      const leans = rnd() < 0.09 && !monster;
       const lean = leans ? Math.round((3 + rnd() * 2) * (rnd() < 0.5 ? -1 : 1)) : 0;
       const h0 = Math.round(row.h[0] + rnd() * (row.h[1] - row.h[0]));
       // front-row monsters stand in front of their neighbours, as in the poster
-      const z = row.monsters[i] && !r ? 6 : row.z[0] + Math.floor(rnd() * (row.z[1] - row.z[0] + 1));
-      out.push([kind, +x.toFixed(1), lean, Math.round(size), z, h0, row.keep(i) ? 1 : 0]);
+      const z = monster && !r ? 6 : row.z[0] + Math.floor(rnd() * (row.z[1] - row.z[0] + 1));
+      out.push([kind, +x.toFixed(1), lean, Math.round(size), z, h0]);
     }
   });
   return out;
 })();
-function clampN(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
 // hand -> [file under src/, wrist left and right outer edge, clip line (all in the 300-unit
 // viewBox, measured from the rendered SVGs), arm: skin colour sampled at the wrist or an arm tile,
 // outline width in units]. The human hands are src/img's hands redrawn at the poster's line weight
@@ -228,13 +236,12 @@ export function mount(host, { assetBase = "" } = {}) {
 
   // --- the crowd -----------------------------------------------------------------------
   const src = (f) => `url(${JSON.stringify(assetBase + "src/" + f)})`;
-  const bars = CROWD.map(([k, x, tilt, size, z, h0, keep]) => {
+  const bars = CROWD.map(([k, x, tilt, size, z, h0]) => {
     const [hand, l, r, clip, arm, outline] = HANDS[k];
     const u = (v) => (v / 300).toFixed(4);   // viewBox units -> fraction of the hand size
     const bar = el("div", "ml-hand");
-    bar.dataset.narrow = String(keep);
     const set = (p, v) => bar.style.setProperty(p, v);
-    set("--x", `${x}%`); set("--tilt", `${tilt}deg`); set("--s0", String(size));
+    set("--x", String(x)); set("--tilt", `${tilt}deg`); set("--s0", String(size));
     set("--aw", u(r - l)); set("--wx", u((l + r) / 2)); set("--clip", u(300 - clip)); set("--ow", u(outline));
     set("--z", String(z)); set("--h0", String(h0)); set("--hand", src(hand));
     set("--arm", arm.startsWith("#") ? arm : `${src(arm)} 0 0 / 100% auto repeat-y`);
@@ -543,8 +550,25 @@ export function mount(host, { assetBase = "" } = {}) {
   };
   root.addEventListener("scroll", onScroll, { passive: true, signal });
 
-  const ro = new ResizeObserver(() => { fit(); if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); });
+  // Hands keep a size set mostly by the window's height (so a short desktop window doesn't fill
+  // up with hands), and the page width decides how many show: the strip is centred and hands
+  // past the edges are dropped, so they load in or out as the window resizes.
+  let lastU = 0, lastHalf = 0;
+  function sizeCrowd() {
+    const W = root.clientWidth, H = root.clientHeight;
+    if (!W || !H) return;
+    const u = clamp(Math.min(H / 940, W / 1100), 0.6, 1);
+    const half = W / 2 / u + 160;   // reference px either side of the centre, plus a hand's reach
+    if (u === lastU && half === lastHalf) return;
+    lastU = u; lastHalf = half;
+    root.style.setProperty("--ml-u", `${u.toFixed(4)}px`);
+    CROWD.forEach((c, i) => { bars[i].hidden = Math.abs(c[1]) > half; });
+  }
+
+  const ro = new ResizeObserver(() => { fit(); sizeCrowd(); if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); });
   ro.observe(lineup);
+  ro.observe(root);
+  sizeCrowd();
   // Row widths depend on the font: refit once it has loaded.
   document.fonts?.load('600 20px "ML Yanone"').then(() => { if (!destroyed) fit(); }, () => {});
 

@@ -457,9 +457,9 @@
 /* ---- Sizes shared by the city and the pinned crowd ------------------------------------ */
 .meet-lolla .ml-city,
 .meet-lolla .ml-crowd {
-  /* The crowd is drawn in reference px (as at 1440 wide) times --u, so it keeps the poster's
-     proportions as the page narrows; on phones it stops shrinking at 0.6. */
-  --u: clamp(0.6px, 100cqi / 1440, 1.15px);
+  /* The crowd is drawn in reference px times --u. mount() sets --ml-u from the window (mostly its
+     height) and shows as many hands as the width holds; the fallback is the width-only scale. */
+  --u: var(--ml-u, clamp(0.6px, 100cqi / 1440, 1px));
   --bar-h: 92px;                                    /* the player bar the hands stand on */
   --hr: 70;                                         /* how far a hand rises at full level */
   --rest-h: calc(290 * var(--u));                   /* the tallest resting fingertip above the bar */
@@ -516,14 +516,18 @@
    weight (--ow) down its sides. The hand is clipped just above any closing stroke at its wrist
    (--clip) and overlaps the arm by 2 viewBox units, so there is no seam. The few tilts sit on
    the bar with its origin at the bottom, so the visualiser only changes height. */
+/* At the hands' scale, centred; on screens wider than that it stretches sideways only, so the
+   lumps stay the same height. */
 .meet-lolla .ml-crowd-shadow {
   position: absolute;
   z-index: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
   bottom: 0;
+  width: max(100%, calc(1600 * var(--u)));
   height: calc(300 * var(--u));
+  transform: translateX(-50%);
   color: var(--ml-crowd-shadow);
+  opacity: 0.8;
 }
 /* The poster's @lollapalooza placard: resting on top of the crowd silhouette, behind the hands
    (hands are z 1-6; this follows the silhouette in the markup at z 0). */
@@ -532,7 +536,7 @@
   z-index: 0;
   left: 8%;
   bottom: calc(205 * var(--u));
-  padding: calc(4 * var(--u)) calc(26 * var(--u)) calc(14 * var(--u));
+  padding: calc(16 * var(--u)) calc(26 * var(--u)) calc(14 * var(--u));
   background: #fff;
   color: #ef4a24;
   font-size: calc(64 * var(--u));
@@ -553,7 +557,7 @@
   --bw: calc(var(--s) * var(--aw));
   position: absolute;
   bottom: -6px;
-  left: var(--x);
+  left: calc(50% + var(--x) * var(--u));
   z-index: var(--z, 1);
   width: var(--bw);
   height: calc((var(--h0) + var(--lvl, 0) * var(--hr)) * var(--u) + 6px);
@@ -878,9 +882,6 @@
   .meet-lolla .ml-city,
   .meet-lolla .ml-crowd {
     --bar-h: 132px;
-  }
-  .meet-lolla .ml-hand[data-narrow="0"] {
-    display: none;
   }
   /* Player on phones: now playing + progress on top, controls below. */
   .meet-lolla .ml-player {
