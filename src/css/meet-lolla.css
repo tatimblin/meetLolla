@@ -376,6 +376,11 @@
   justify-content: flex-start;
   flex-wrap: nowrap;
 }
+/* measure the playing name at its resting size, not grown or kicked */
+.meet-lolla .ml-measuring .ml-name {
+  scale: 1 !important;
+  transform: none !important;
+}
 .meet-lolla .ml-row-top {
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -570,15 +575,16 @@
   left: calc(50% + var(--x) * var(--u));
   z-index: var(--z, 1);
   width: var(--bw);
-  height: calc((var(--h0) + var(--lvl, 0) * var(--hr)) * var(--u) + 6px);
+  /* drawn at full rise; the level slides it up from behind the bar, so the visualiser only
+     touches transform (no layout per frame) */
+  height: calc((var(--h0) + var(--hr)) * var(--u) + 6px);
   margin-left: calc(var(--bw) / -2);
   background: var(--arm);
   box-shadow:
     inset calc(var(--s) * var(--ow)) 0 0 #1d1d1b,
     inset calc(var(--s) * var(--ow) * -1) 0 0 #1d1d1b;
-  transform: rotate(var(--tilt));
-  transform-origin: 50% 100%;
-  transition: height 90ms linear;
+  transform: translateY(calc((1 - var(--lvl, 0)) * var(--hr) * var(--u))) rotate(var(--tilt));
+  transform-origin: 50% calc(100% - var(--hr) * var(--u));   /* the tilt pivots at the bar line at rest */
 }
 .meet-lolla .ml-hand::before {
   content: "";

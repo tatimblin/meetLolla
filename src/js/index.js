@@ -176,8 +176,8 @@ export function mount(host, { assetBase = "" } = {}) {
   /** @type {AnalyserNode | null} */ let analyser = null;
   let freq = new Uint8Array(0);
   let raf = 0, scrollRaf = 0, fitRaf = 0;
-  let advancing = false;   // one advance per clip, even if timeupdate and ended both fire
-  let lastUserScroll = -Infinity, ownScrollUntil = 0;
+  let lastUserScroll = -Infinity, ownScrollUntil = 0, ownScrolling = false;
+  const HAS_SCROLLEND = "onscrollend" in root;
 
   // --- lineup: all four days, like the admat -------------------------------------------
   function nameNode(entry) {
@@ -225,8 +225,10 @@ export function mount(host, { assetBase = "" } = {}) {
   root.insertAdjacentHTML("beforeend", `<svg class="ml-defs" aria-hidden="true" focusable="false" width="0" height="0"><filter id="${warpId}" x="-6%" y="-35%" width="112%" height="170%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.03 0.07" numOctaves="1" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`);
   const turb = root.querySelector(`#${warpId} feTurbulence`);
   const disp = root.querySelector(`#${warpId} feDisplacementMap`);
-  // Safari renders url() filters on HTML at 1x and smears them when they animate: no warp there.
-  const canWarp = !/^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+  // WebKit (Safari, and every browser on iOS) renders url() filters on HTML at 1x and smears them
+  // when they animate: no warp there.
+  const ua = navigator.userAgent;
+  const canWarp = !(/AppleWebKit/.test(ua) && !/Chrome|Chromium|Android/.test(ua)) && !/CriOS|FxiOS|EdgiOS/.test(ua);
   const NAME_SCALE = 1.34;   // keep in step with the CSS scale on .ml-name.ml-is-playing
   /** @type {null | { b: HTMLElement, name: string, ls: HTMLElement[], bins: number[], env: Float32Array, avg: Float32Array, peak: Float32Array, kick: number, bass: number, loud: number, warp: boolean }} */
   let dancer = null;
@@ -363,7 +365,7 @@ export function mount(host, { assetBase = "" } = {}) {
     const isAlso = (r) => r.classList.contains("ml-row-also");
     // on phones a row that only just fits would span edge to edge between centred wrapped rows,
     // so rows stay at the base size, the top billing stays big, and near-full rows wrap too
-    const narrow = W < 520;
+    const narrow = root.clientWidth <= 600;   // the same cut as the CSS's phone layout
     const minFit = Math.min(...rows.map((r, i) => (isTop(r) || isAlso(r) ? Infinity : W / k[i])));
     const base = clamp(minFit, narrow ? 17 : 18, 34);
     rows.forEach((r, i) => {
@@ -423,7 +425,6 @@ export function mount(host, { assetBase = "" } = {}) {
 
   function play(entry) {
     current = entry;
-    advancing = false;
     root.classList.add("ml-has-played");
     const info = bySlug.get(entry.slug);
     const day = days.find((d) => d.id === entry.day);
@@ -460,11 +461,10 @@ export function mount(host, { assetBase = "" } = {}) {
     const top = box.top - r.top;
     const clearBottom = player.getBoundingClientRect().top - r.top - visual.offsetHeight * 0.6;
     if (top >= 8 && box.bottom - r.top <= clearBottom) return;
-    ownScrollUntil = performance.now() + 1500;
-    root.scrollTo({
-      top: Math.max(0, root.scrollTop + top - Math.max(8, (clearBottom - box.height) / 2)),
-      behavior: still() ? "auto" : "smooth",
-    });
+    const target = Math.max(0, root.scrollTop + top - Math.max(8, (clearBottom - box.height) / 2));
+    ownScrollUntil = performance.now() + 1500;   // or until scrollend, whichever is later
+    ownScrolling = HAS_SCROLLEND && Math.abs(target - root.scrollTop) > 1;
+    root.scrollTo({ top: target, behavior: still() ? "auto" : "smooth" });
   }
 
   function shuffle() {
@@ -475,10 +475,10 @@ export function mount(host, { assetBase = "" } = {}) {
 
   // Each preview plays for up to 30s, then the next random artist. Auto-advance follows along
   // only if the listener isn't reading elsewhere: it scrolls to the new name only when that name
-  // is off screen and the user hasn't scrolled for a few seconds.
+  // is off screen and the user hasn't scrolled for a few seconds. (Changing src drops the old
+  // clip's queued events, so timeupdate and ended can't both advance one clip.)
   function advance() {
-    if (advancing || destroyed) return;
-    advancing = true;
+    if (destroyed) return;
     const e = pickRandom();
     play(e);
     if (performance.now() - lastUserScroll > USER_SCROLL_QUIET_MS) reveal(e.slug);
@@ -516,6 +516,7 @@ export function mount(host, { assetBase = "" } = {}) {
     analyser.getByteFrequencyData(freq);
     if (live) {
       for (let i = 0; i < bars.length; i++) {
+        if (bars[i].hidden) continue;   // past the screen edges (sizeCrowd)
         const b = BINS[i];
         const lvl = Math.min(1, (freq[b] / 255) * (1 + b / 30));
         bars[i].style.setProperty("--lvl", (lvl * lvl).toFixed(3));
@@ -578,6 +579,11 @@ export function mount(host, { assetBase = "" } = {}) {
   }, { signal });
   audio.addEventListener("loadedmetadata", () => showProgress(audio.currentTime), { signal });
   audio.addEventListener("ended", () => { stopBars(); advance(); }, { signal });
+  // a clip that fails to load (404, network) would otherwise stall the shuffle for good; after a
+  // few failures in a row (offline) stop trying until something plays
+  let failures = 0;
+  audio.addEventListener("playing", () => { failures = 0; }, { signal });
+  audio.addEventListener("error", () => { if (current && ++failures < 3) advance(); }, { signal });
   reduceMotion.addEventListener?.("change", () => {
     if (still()) { cancelAnimationFrame(raf); raf = 0; stopBars(); }
     markPlaying();
@@ -593,10 +599,12 @@ export function mount(host, { assetBase = "" } = {}) {
   }
   const queueScroll = () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); };
   const onScroll = () => {
-    if (performance.now() > ownScrollUntil) lastUserScroll = performance.now();
+    if (!ownScrolling && performance.now() > ownScrollUntil) lastUserScroll = performance.now();
     queueScroll();
   };
   root.addEventListener("scroll", onScroll, { passive: true, signal });
+  // a long smooth scroll of our own can outlast the timeout; where scrollend exists it ends it
+  if (HAS_SCROLLEND) root.addEventListener("scrollend", () => { ownScrolling = false; }, { signal });
 
   // Hands keep a size set mostly by the window's height (so a short desktop window doesn't fill
   // up with hands), and the page width decides how many show: the strip is centred and hands
@@ -613,8 +621,8 @@ export function mount(host, { assetBase = "" } = {}) {
     CROWD.forEach((c, i) => { bars[i].hidden = Math.abs(c[1]) > half; });
   }
 
+  // only the root: the lineup's own height changes with every fit, which would refit twice
   const ro = new ResizeObserver(() => { fit(); sizeCrowd(); queueScroll(); });
-  ro.observe(lineup);
   ro.observe(root);
   sizeCrowd();
   // Row widths depend on the font: refit once it has loaded.
