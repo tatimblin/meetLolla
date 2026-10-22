@@ -2,8 +2,8 @@
 
 A 2017 school project: a player for the Lollapalooza 2017 lineup (Grant Park, Chicago,
 August 3-6, 2017), restyled in 2026 after the official poster: the whole four-day lineup on one
-long page. Tap a name to hear a 30-second preview, or Shuffle; the crowd of hands pinned along
-the bottom is the audio visualiser and holds up a sign with what is playing. Built June 2017,
+long page. Tap a name to hear a 30-second preview, or Shuffle; a player bar is pinned along the
+bottom, and the crowd of hands standing on it is the audio visualiser. Built June 2017,
 originally a Jekyll site at meetlolla.com; now packaged as an embeddable ES module.
 
 ## Embed

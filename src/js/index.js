@@ -2,7 +2,7 @@
 //
 // The 2017 Lollapalooza poster, as a player: the whole four-day lineup as one long poster, tap a
 // name to hear its 30s preview or shuffle across all of it. A crowd of hands pinned to the bottom
-// is the audio visualiser and holds up a "NOW: <ARTIST>" sign; the city skyline closes the page.
+// is the audio visualiser, standing on a poster-blue player bar; the city skyline closes the page.
 //
 // Everything renders inside `el` under one .meet-lolla root that is its own scroller. Nothing
 // plays until a tap: the AudioContext is created on the first press of a name or Shuffle.
@@ -16,7 +16,7 @@ import skylineFrontSvg from "../svg/poster/skyline-front.svg";
 import { artists } from "./artists.js";
 import { days } from "./lineup.js";
 
-const ADVANCE_MS = 30_000;   // each preview is a 30s clip
+const PREVIEW_S = 30;   // each preview plays for up to 30s, then the next artist
 const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this long of the user scrolling
 
 const instances = new WeakMap();
@@ -73,12 +73,10 @@ const fontFaces = (base) => {
 
 const speakerSvg = `<svg class="ml-speaker" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9.5h3.6L11.5 5v14l-4.9-4.5H3z" fill="currentColor"/><g class="ml-speaker-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 9.2a4 4 0 0 1 0 5.6"/><path d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/></g><g class="ml-speaker-off" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g></svg>`;
 const shuffleSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c4.5 0 6.5 10 11 10H21"/><path d="M3 17h3.5c1.8 0 3-1.6 4.1-3.5M13.4 10.5C14.5 8.6 15.7 7 17.5 7H21"/><path d="M18.5 4.5L21 7l-2.5 2.5M18.5 14.5L21 17l-2.5 2.5"/></svg>`;
-const star = `<span class="ml-star" aria-hidden="true">★</span>`;
+const playSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="ml-icon-play" d="M8 5.5v13l10.5-6.5z" fill="currentColor"/><g class="ml-icon-pause" fill="currentColor"><rect x="6.5" y="5.5" width="4" height="13" rx="1"/><rect x="13.5" y="5.5" width="4" height="13" rx="1"/></g></svg>`;
+const star =`<span class="ml-star" aria-hidden="true">★</span>`;
 
 const markup = (uid) => `
-<div class="ml-pin-top">
-  <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
-</div>
 <header class="ml-top">
   <div class="ml-sun" aria-hidden="true">${sunSvg}</div>
   <div class="ml-clouds" aria-hidden="true">${cloudsSvg}</div>
@@ -101,16 +99,24 @@ const markup = (uid) => `
 </div>
 <div class="ml-crowd">
   <div class="ml-visual" aria-hidden="true"></div>
-  <div class="ml-sign" role="region" aria-label="Now playing">
-    <p class="ml-sign-text" aria-live="polite"></p>
-    <div class="ml-sign-actions">
+  <div class="ml-player" role="region" aria-label="Player">
+    <div class="ml-controls">
       <button type="button" class="ml-shuffle">${shuffleSvg}<span>Shuffle</span></button>
-      <a class="ml-youtube" target="_blank" rel="noopener" hidden>Full song on YouTube</a>
+      <button type="button" class="ml-play" aria-label="Play">${playSvg}</button>
     </div>
+    <div class="ml-np">
+      <p class="ml-np-line"><span class="ml-np-name" aria-live="polite">Tap a name or shuffle</span><span class="ml-np-day"></span></p>
+      <div class="ml-progress-row">
+        <div class="ml-progress" role="slider" tabindex="-1" aria-label="Position in the 30-second preview" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" aria-valuetext="0 of 30 seconds" aria-disabled="true"><span class="ml-progress-fill"></span></div>
+        <span class="ml-time" aria-hidden="true">0:00 / 0:30</span>
+      </div>
+    </div>
+    <div class="ml-extras">
+      <a class="ml-youtube" target="_blank" rel="noopener" hidden>Full song on YouTube</a>
+      <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
+    </div>
+    <p class="ml-credit">Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017 · a school project, restyled in 2026 after the official poster.</p>
   </div>
-  <footer class="ml-footer">
-    <p>Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017. A school project, restyled in 2026 after the official poster art.</p>
-  </footer>
   <audio class="ml-audio" preload="none" crossorigin="anonymous"></audio>
 </div>`;
 
@@ -151,8 +157,13 @@ export function mount(host, { assetBase = "" } = {}) {
   const muteBtn = $(".ml-mute");
   const shuffleBtn = $(".ml-shuffle");
   const lineup = $(".ml-lineup");
-  const sign = $(".ml-sign");
-  const signText = $(".ml-sign-text");
+  const playBtn = $(".ml-play");
+  const player = $(".ml-player");
+  const npName = $(".ml-np-name");
+  const npDay = $(".ml-np-day");
+  const progress = $(".ml-progress");
+  const progressFill = $(".ml-progress-fill");
+  const timeEl = $(".ml-time");
   const linkEl = /** @type {HTMLAnchorElement} */ ($(".ml-youtube"));
   const city = $(".ml-city");
   const visual = $(".ml-visual");
@@ -197,7 +208,8 @@ export function mount(host, { assetBase = "" } = {}) {
   /** @type {AudioContext | null} */ let ctx = null;
   /** @type {AnalyserNode | null} */ let analyser = null;
   let freq = new Uint8Array(0);
-  let timer = 0, raf = 0, scrollRaf = 0, fitRaf = 0;
+  let raf = 0, scrollRaf = 0, fitRaf = 0;
+  let advancing = false;   // one advance per clip, even if timeupdate and ended both fire
   let lastUserScroll = -Infinity, ownScrollUntil = 0;
 
   // --- lineup: all four days, like the admat -------------------------------------------
@@ -315,18 +327,23 @@ export function mount(host, { assetBase = "" } = {}) {
 
   function play(entry) {
     current = entry;
+    advancing = false;
     root.classList.add("ml-has-played");
     const info = bySlug.get(entry.slug);
-    signText.textContent = `Now: ${entry.name}`;
+    const day = days.find((d) => d.id === entry.day);
+    npName.replaceChildren(el("span", "ml-sr", "Now playing: "), entry.name);
+    npDay.textContent = `${day.label.slice(0, 3)} · ${day.date.replace(/, \d{4}$/, "")}`;
     if (info) {
       linkEl.href = info.link;
       linkEl.setAttribute("aria-label", `Full song by ${entry.name} on YouTube`);
       linkEl.hidden = false;
     }
+    progress.tabIndex = 0;
+    progress.setAttribute("aria-disabled", "false");
+    showProgress(0);
     markPlaying();
     audio.src = `${assetBase}src/audio/${encodeURIComponent(entry.slug)}.mp3`;
     audio.play().catch(() => { /* aborted by the next tap, or blocked; the next tap retries */ });
-    restartTimer();
   }
 
   function pickRandom() {
@@ -337,14 +354,14 @@ export function mount(host, { assetBase = "" } = {}) {
   }
 
   // Bring the playing name into view inside the root (never scrollIntoView: it would scroll the
-  // host page too), between the top and the pinned sign/crowd. Returns quietly if it's visible.
+  // host page too), between the top and the crowd standing on the player bar. Quiet if visible.
   function reveal(slug) {
     const b = lineup.querySelector(`button.ml-name[data-slug="${CSS.escape(slug)}"]`);
     if (!b) return;
     const r = root.getBoundingClientRect();
     const box = b.getBoundingClientRect();
     const top = box.top - r.top;
-    const clearBottom = Math.min(root.clientHeight, sign.getBoundingClientRect().top - r.top) - 8;
+    const clearBottom = player.getBoundingClientRect().top - r.top - visual.offsetHeight * 0.6;
     if (top >= 8 && box.bottom - r.top <= clearBottom) return;
     ownScrollUntil = performance.now() + 1500;
     root.scrollTo({
@@ -359,17 +376,39 @@ export function mount(host, { assetBase = "" } = {}) {
     reveal(e.slug);
   }
 
-  // Auto-advance follows along only if the listener isn't reading elsewhere: it scrolls to the
-  // new name only when that name is off screen and the user hasn't scrolled for a few seconds.
+  // Each preview plays for up to 30s, then the next random artist. Auto-advance follows along
+  // only if the listener isn't reading elsewhere: it scrolls to the new name only when that name
+  // is off screen and the user hasn't scrolled for a few seconds.
   function advance() {
+    if (advancing || destroyed) return;
+    advancing = true;
     const e = pickRandom();
     play(e);
     if (performance.now() - lastUserScroll > USER_SCROLL_QUIET_MS) reveal(e.slug);
   }
 
-  function restartTimer() {
-    clearInterval(timer);
-    timer = setInterval(advance, ADVANCE_MS);
+  // --- progress: a 30s bar, seekable by click and arrow keys --------------------------
+  const clipLength = () => Math.min(PREVIEW_S, Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : PREVIEW_S);
+  const mmss = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  function showProgress(t) {
+    const max = clipLength();
+    const v = clamp(t, 0, max);
+    progressFill.style.transform = `scaleX(${(v / max).toFixed(4)})`;
+    timeEl.textContent = `${mmss(v)} / ${mmss(max)}`;
+    progress.setAttribute("aria-valuemax", String(Math.round(max)));
+    progress.setAttribute("aria-valuenow", String(Math.round(v)));
+    progress.setAttribute("aria-valuetext", `${Math.round(v)} of ${Math.round(max)} seconds`);
+  }
+  function seek(t) {
+    // only when the server allows it (Range requests); otherwise setting currentTime restarts
+    if (!current || !Number.isFinite(audio.duration) || !audio.seekable.length || audio.seekable.end(0) <= 0) return;
+    audio.currentTime = clamp(t, 0, clipLength() - 0.25);
+    showProgress(audio.currentTime);
+  }
+
+  function setPlayButton(playing) {
+    playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+    root.classList.toggle("ml-is-playing", playing);
   }
 
   function frame() {
@@ -398,10 +437,29 @@ export function mount(host, { assetBase = "" } = {}) {
     if (!entry) return;
     ensureGraph();
     play(entry);
-    reveal(entry.slug);   // e.g. tapped while half under the sign
+    reveal(entry.slug);   // e.g. tapped while half behind the crowd
   }, { signal });
 
   shuffleBtn.addEventListener("click", () => { ensureGraph(); shuffle(); }, { signal });
+  playBtn.addEventListener("click", () => {
+    ensureGraph();
+    if (!current) return shuffle();   // before anything has played, Play starts a shuffle
+    if (audio.paused) audio.play().catch(() => {});
+    else audio.pause();
+  }, { signal });
+
+  progress.addEventListener("click", (ev) => {
+    const b = progress.getBoundingClientRect();
+    seek(((ev.clientX - b.left) / b.width) * clipLength());
+  }, { signal });
+  progress.addEventListener("keydown", (ev) => {
+    const step = { ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5 }[ev.key];
+    if (step != null) seek(audio.currentTime + step);
+    else if (ev.key === "Home") seek(0);
+    else if (ev.key === "End") seek(clipLength());
+    else return;
+    ev.preventDefault();
+  }, { signal });
 
   function setMuted(m) {
     audio.muted = m;
@@ -412,9 +470,14 @@ export function mount(host, { assetBase = "" } = {}) {
   // leaving for the full song: hush the preview (2017 behaviour)
   linkEl.addEventListener("click", () => setMuted(true), { signal });
 
-  audio.addEventListener("playing", startBars, { signal });
-  audio.addEventListener("pause", stopBars, { signal });
-  audio.addEventListener("ended", stopBars, { signal });
+  audio.addEventListener("playing", () => { setPlayButton(true); startBars(); }, { signal });
+  audio.addEventListener("pause", () => { setPlayButton(false); stopBars(); }, { signal });
+  audio.addEventListener("timeupdate", () => {
+    showProgress(audio.currentTime);
+    if (audio.currentTime >= PREVIEW_S) advance();
+  }, { signal });
+  audio.addEventListener("loadedmetadata", () => showProgress(audio.currentTime), { signal });
+  audio.addEventListener("ended", () => { stopBars(); advance(); }, { signal });
   reduceMotion.addEventListener?.("change", () => {
     if (still()) stopBars(); else if (!audio.paused) startBars();
   }, { signal });
@@ -437,7 +500,6 @@ export function mount(host, { assetBase = "" } = {}) {
   // Row widths depend on the font: refit once it has loaded.
   document.fonts?.load('600 20px "ML Antonio"').then(() => { if (!destroyed) fit(); }, () => {});
 
-  signText.textContent = "Tap a name";
   fitNow();
   applyScroll();
 
@@ -447,7 +509,6 @@ export function mount(host, { assetBase = "" } = {}) {
       destroyed = true;
       ac.abort();
       ro.disconnect();
-      clearInterval(timer);
       cancelAnimationFrame(raf);
       cancelAnimationFrame(scrollRaf);
       cancelAnimationFrame(fitRaf);
