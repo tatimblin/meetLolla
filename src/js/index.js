@@ -261,7 +261,7 @@ export function mount(host, { assetBase = "" } = {}) {
   function rowNode(entries, cls) {
     const row = el("p", cls);
     entries.forEach((e, i) => {
-      if (i) row.append(el("span", "ml-dot", "•"));
+      if (i) row.append(el("span", "ml-dot"));
       row.append(nameNode(e));
     });
     for (const dot of row.querySelectorAll(".ml-dot")) dot.setAttribute("aria-hidden", "true");
@@ -318,14 +318,18 @@ export function mount(host, { assetBase = "" } = {}) {
     // so rows stay at the base size, the top billing stays big, and near-full rows wrap too
     const narrow = W < 520;
     rows.forEach((r, i) => {
-      let fs = narrow ? base : clamp(W / k[i], base, base * 1.18);   // rows may grow a little to fill, like the poster
-      if (isTop(r)) fs = narrow ? base * 1.45 : clamp(W / k[i], base * 1.15, base * 1.6);
+      // rows grow to fill, like the poster, whose undercard caps run 18-24px at 792 wide
+      // a day's last row grows less and is centred unless it nearly fills the width; the
+      // poster's PHAM ... MAX is a size smaller than the rows above it, centred at 75% wide
+      const last = !r.nextElementSibling || isAlso(/** @type {HTMLElement} */ (r.nextElementSibling));
+      let fs = narrow ? base : clamp(W / k[i], base, base * (last ? 1.1 : 1.25));
+      if (isTop(r)) fs = narrow ? base * 1.45 : clamp(W / k[i], base * 1.15, base * 1.48);
       if (isAlso(r)) fs = Math.max(15, base * 0.72);
       const fill = (k[i] * fs) / W;
       const wrap = fill > (narrow && !isAlso(r) ? 0.85 : 1.001);
       r.style.setProperty("--fs", `${fs.toFixed(2)}px`);
       r.classList.toggle("ml-wrap", wrap);
-      r.classList.toggle("ml-justify", !wrap && fill > 0.8 && !isAlso(r));
+      r.classList.toggle("ml-justify", !wrap && fill > (last ? 0.9 : 0.8) && !isAlso(r));
       if (wrap) breakRow(r, parts[i], k[i], Math.max(2, Math.ceil(fill / 0.97)));
     });
     lineup.style.setProperty("--ml-base", `${base.toFixed(2)}px`);
