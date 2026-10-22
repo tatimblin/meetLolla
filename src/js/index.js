@@ -13,6 +13,7 @@ import sunSvg from "../svg/poster/sunburst.svg";
 import cloudsSvg from "../svg/poster/clouds.svg";
 import skylineBackSvg from "../svg/poster/skyline-back.svg";
 import skylineFrontSvg from "../svg/poster/skyline-front.svg";
+import crowdShadowSvg from "../svg/poster/crowd-shadow.svg";
 import { artists } from "./artists.js";
 import { days } from "./lineup.js";
 
@@ -22,12 +23,14 @@ const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this 
 const instances = new WeakMap();
 let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
 
-// The crowd, as dense as the poster's: about 38 hands across, shoulder to shoulder, in two rows.
-// The back row is smaller, stands a little higher and sits behind the front row; together the
-// arms make a near-solid wall. Positions, sizes and rest heights are irregular but come from a
-// fixed seed, so the crowd is identical on every load. Rows: [hand, left %, tilt deg, size px,
-// z, rest height px, kept on narrow screens]. About one hand in five leans, 4-7 degrees; about
-// one in eight is a monster, never two side by side.
+// The crowd, as dense as the poster's: about 34 big hands across, packed edge to edge and
+// overlapping, in two rows, mostly just hand and wristband with the arms cut off low. The back
+// row is a little smaller and stands a little higher; the crowd shadow fills in behind them.
+// Positions, sizes and rest heights are irregular but come from a fixed seed, so the crowd is
+// identical on every load. Rows: [hand, left %, tilt deg, size, z, rest height, kept on narrow
+// screens]; size and rest height are in reference px (the crowd at 1440 wide), scaled by --u in
+// the CSS. About one human hand in eight leans, 3-5 degrees; monsters never lean, and about
+// one hand in seven is a monster, never two side by side.
 const CROWD = (() => {
   let seed = 20170803;
   const rnd = () => {   // mulberry32
@@ -36,12 +39,13 @@ const CROWD = (() => {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  const humans = ["h1", "h4", "h2", "h5", "h3b", "h6", "h1b", "h7", "h3", "h6b", "h4", "h5"];
+  // fists, peace and rock signs dominate, as in the poster; an open palm now and then
+  const humans = ["h2", "h1", "h3b", "h7", "h6", "h1b", "h4", "h2", "h3", "h6b", "h7", "h1", "h5"];
   const small = new Set(["h2", "h7"]);   // fists read bigger, so draw them a little smaller
   const rows = [
     // count, size range, rest height range, z range, monster slots, which to keep on phones
-    { n: 22, s: [150, 170], h: [8, 30], z: [3, 5], monsters: { 2: "claw", 8: "rock", 13: "eye", 19: "peace" }, keep: (i) => i % 3 !== 0 },
-    { n: 16, s: [130, 148], h: [18, 46], z: [1, 2], monsters: { 3: "claw" }, keep: (i) => i % 5 === 2 },
+    { n: 20, s: [228, 252], h: [0, 26], z: [3, 5], monsters: { 2: "claw", 7: "rock", 12: "eye", 17: "peace" }, keep: (i) => ![1, 4, 6, 9, 12, 14, 16, 19].includes(i) },
+    { n: 14, s: [206, 228], h: [24, 62], z: [1, 2], monsters: { 6: "claw" }, keep: (i) => i % 4 === 1 },
   ];
   const out = [];
   let h = 0;
@@ -55,31 +59,35 @@ const CROWD = (() => {
       let size = lo + rnd() * (hi - lo);
       if (small.has(kind)) size *= 0.86;
       if (row.monsters[i]) size *= 1.06;
-      const lean = rnd() < 0.2 ? Math.round((4 + rnd() * 3) * (rnd() < 0.5 ? -1 : 1)) : 0;
+      const leans = rnd() < 0.09 && !row.monsters[i];
+      const lean = leans ? Math.round((3 + rnd() * 2) * (rnd() < 0.5 ? -1 : 1)) : 0;
       const h0 = Math.round(row.h[0] + rnd() * (row.h[1] - row.h[0]));
-      const z = row.z[0] + Math.floor(rnd() * (row.z[1] - row.z[0] + 1));
+      // front-row monsters stand in front of their neighbours, as in the poster
+      const z = row.monsters[i] && !r ? 6 : row.z[0] + Math.floor(rnd() * (row.z[1] - row.z[0] + 1));
       out.push([kind, +x.toFixed(1), lean, Math.round(size), z, h0, row.keep(i) ? 1 : 0]);
     }
   });
   return out;
 })();
 function clampN(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
-// hand -> [file under src/, wrist left and right edge, clip line (all in the 300-unit viewBox,
-// measured from the rendered SVGs), arm: skin colour sampled at the wrist or an arm tile, outline
-// width in units]. The arm is exactly as wide as the wrist and centred on it; the hand is clipped
-// at the clip line (below it some hands draw a closing stroke) and overlaps the arm by 2 units,
-// so hand and arm read as one limb.
+// hand -> [file under src/, wrist left and right outer edge, clip line (all in the 300-unit
+// viewBox, measured from the rendered SVGs), arm: skin colour sampled at the wrist or an arm tile,
+// outline width in units]. The human hands are src/img's hands redrawn at the poster's line weight
+// (4.2 units, about 8% of the wrist width, as in the poster); their wrist edges are the outer
+// edges of that stroke. The arm is exactly as wide as the wrist and centred on it, with the same
+// outline down its sides; the hand is clipped at the clip line (below it some hands draw a
+// closing stroke) and overlaps the arm by 2 units, so hand and arm read as one limb.
 const HANDS = {
-  h1: ["img/hand1.svg", 119, 175.5, 291, "#ec9683", 0.5],
-  h1b: ["svg/poster/hands/hand1-band.svg", 119, 175.5, 291, "#ec9683", 0.5],
-  h2: ["img/hand2.svg", 119, 189.5, 300, "#c66e34", 1],
-  h3: ["img/hand3.svg", 145, 193.5, 300, "#e3937c", 1],
-  h3b: ["svg/poster/hands/hand3-band.svg", 145, 193.5, 300, "#e3937c", 1],
-  h4: ["img/hand4.svg", 111, 163.5, 300, "#f6ba98", 1],
-  h5: ["img/hand5.svg", 111, 163.5, 300, "#c66e34", 1],
-  h6: ["img/hand6.svg", 145, 193.5, 300, "#c66e34", 1],
-  h6b: ["svg/poster/hands/hand6-band.svg", 145, 193.5, 300, "#c66e34", 1],
-  h7: ["img/hand7.svg", 119, 189.5, 300, "#e3937c", 1],
+  h1: ["svg/poster/hands/hand1.svg", 117.15, 177.35, 290.5, "#ec9683", 4.2],
+  h1b: ["svg/poster/hands/hand1-band.svg", 117.15, 177.35, 290.5, "#ec9683", 4.2],
+  h2: ["svg/poster/hands/hand2.svg", 117.4, 191.1, 296.5, "#c66e34", 4.2],
+  h3: ["svg/poster/hands/hand3.svg", 143.4, 195.1, 296.5, "#e3937c", 4.2],
+  h3b: ["svg/poster/hands/hand3-band.svg", 143.4, 195.1, 296.5, "#e3937c", 4.2],
+  h4: ["svg/poster/hands/hand4.svg", 109.4, 165.1, 296.5, "#f6ba98", 4.2],
+  h5: ["svg/poster/hands/hand5.svg", 109.4, 165.1, 296.5, "#c66e34", 4.2],
+  h6: ["svg/poster/hands/hand6.svg", 143.4, 195.1, 296.5, "#c66e34", 4.2],
+  h6b: ["svg/poster/hands/hand6-band.svg", 143.4, 195.1, 296.5, "#c66e34", 4.2],
+  h7: ["svg/poster/hands/hand7.svg", 117.4, 191.1, 296.5, "#e3937c", 4.2],
   claw: ["svg/poster/hands/hand-monster-claw.svg", 99, 201, 300, "svg/poster/hands/arm-claw.svg", 0],
   rock: ["svg/poster/hands/hand-monster-rock.svg", 99, 201, 300, "svg/poster/hands/arm-rock.svg", 0],
   eye: ["svg/poster/hands/hand-monster-eye.svg", 99, 201, 300, "svg/poster/hands/arm-eye.svg", 0],
@@ -128,7 +136,7 @@ const markup = (uid) => `
   <div class="ml-sky ml-sky-front">${skylineFrontSvg}</div>
 </div>
 <div class="ml-crowd">
-  <div class="ml-visual" aria-hidden="true"></div>
+  <div class="ml-visual" aria-hidden="true"><div class="ml-crowd-shadow">${crowdShadowSvg}</div></div>
   <div class="ml-player" role="region" aria-label="Player">
     <div class="ml-controls">
       <button type="button" class="ml-shuffle">${shuffleSvg}<span>Shuffle</span></button>
@@ -197,7 +205,7 @@ export function mount(host, { assetBase = "" } = {}) {
   const linkEl = /** @type {HTMLAnchorElement} */ ($(".ml-youtube"));
   const city = $(".ml-city");
   const visual = $(".ml-visual");
-  for (const svg of root.querySelectorAll(".ml-logo svg, .ml-sun svg, .ml-clouds svg, .ml-city svg")) {
+  for (const svg of root.querySelectorAll(".ml-logo svg, .ml-sun svg, .ml-clouds svg, .ml-city svg, .ml-crowd-shadow svg")) {
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("focusable", "false");
   }
@@ -224,9 +232,9 @@ export function mount(host, { assetBase = "" } = {}) {
     const bar = el("div", "ml-hand");
     bar.dataset.narrow = String(keep);
     const set = (p, v) => bar.style.setProperty(p, v);
-    set("--x", `${x}%`); set("--tilt", `${tilt}deg`); set("--s0", `${size}px`);
+    set("--x", `${x}%`); set("--tilt", `${tilt}deg`); set("--s0", String(size));
     set("--aw", u(r - l)); set("--wx", u((l + r) / 2)); set("--clip", u(300 - clip)); set("--ow", u(outline));
-    set("--z", String(z)); set("--h0", `${h0}px`); set("--hand", src(hand));
+    set("--z", String(z)); set("--h0", String(h0)); set("--hand", src(hand));
     set("--arm", arm.startsWith("#") ? arm : `${src(arm)} 0 0 / 100% auto repeat-y`);
     visual.append(bar);
     return bar;

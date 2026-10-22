@@ -4,8 +4,8 @@
 	 viewBox="0 0 300 300" style="enable-background:new 0 0 300 300;" xml:space="preserve">
 <style type="text/css">
 	.st0{display:none;}
-	.st1{fill:#EC9683;stroke:#000000;stroke-width:0.5;stroke-miterlimit:10;}
-	.st2{fill:none;stroke:#000000;stroke-width:0.5;stroke-miterlimit:10;}
+	.st1{fill:#EC9683;stroke:#000000;stroke-width:4.2;stroke-linejoin:round;stroke-linecap:round;}
+	.st2{fill:none;stroke:#000000;stroke-width:4.2;stroke-linejoin:round;stroke-linecap:round;}
 </style>
 <g id="hand1">
 	<g>
@@ -23,5 +23,5 @@
 		<path class="st2" d="M132.8,168c0,0,15.9-10.5,13.2,11.9"/>
 	</g>
 </g>
-<g stroke="#1d1d1b" stroke-width="2.5" stroke-linejoin="round"><rect x="116" y="262" width="58" height="15" rx="3" fill="#F2D13A"/><rect x="134" y="259" width="22" height="21" rx="2" fill="#fff"/><path fill="#F2D13A" d="M172 267l16 9l-4 5zM172 271l10 15l-5 2z"/></g>
+<g stroke="#1d1d1b" stroke-width="4.2" stroke-linejoin="round"><rect x="116" y="262" width="58" height="15" rx="3" fill="#F2D13A"/><rect x="134" y="259" width="22" height="21" rx="2" fill="#fff"/><path fill="#F2D13A" d="M172 267l16 9l-4 5zM172 271l10 15l-5 2z"/></g>
 </svg>

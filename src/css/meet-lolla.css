@@ -10,6 +10,7 @@
   --ml-sky: #39b9e0;
   --ml-sky-back: #26a7d7;
   --ml-sky-front: #1295cb;
+  --ml-crowd-shadow: #1b5aa3;   /* sampled from the poster's crowd silhouette */
   --ml-sun: #ffef66;
   --ml-navy: #1a5296;
   --ml-cloud: #fff;
@@ -434,19 +435,23 @@
 /* ---- Sizes shared by the city and the pinned crowd ------------------------------------ */
 .meet-lolla .ml-city,
 .meet-lolla .ml-crowd {
+  /* The crowd is drawn in reference px (as at 1440 wide) times --u, so it keeps the poster's
+     proportions as the page narrows; on phones it stops shrinking at 0.6. */
+  --u: clamp(0.6px, 100cqi / 1440, 1.15px);
   --bar-h: 92px;                                    /* the player bar the hands stand on */
-  --crowd-h: calc(272px + var(--bar-h));            /* pinned: hands + bar */
-  --hr: 76px;                                       /* how far a hand rises at full level */
-  --rest-h: 200px;                                  /* a typical raised hand above the bar */
+  --hr: 70;                                         /* how far a hand rises at full level */
+  --rest-h: calc(290 * var(--u));                   /* the tallest resting fingertip above the bar */
+  --crowd-h: calc(380 * var(--u) + var(--bar-h));   /* pinned: hands at full rise + bar */
 }
 
 /* ---- City: at the very end of the page, behind the crowd. The two layers rise as it
    scrolls into view (--ml-p 0..1). Its height keeps the last lineup row clear of the crowd
-   and the player bar when scrolled to the end. ------------------------------------------------- */
+   and the player bar when scrolled to the end, and shows about 10% of the page width of skyline
+   above the fingertips, as the poster does. ------------------------------------------------- */
 .meet-lolla .ml-city {
   --ml-p: 1;
   position: relative;
-  height: calc(var(--bar-h) + var(--rest-h) + clamp(36px, 5cqi, 90px));
+  height: calc(var(--bar-h) + var(--rest-h) + clamp(36px, 10cqi, 170px));
   overflow: hidden;
 }
 .meet-lolla .ml-sky {
@@ -489,15 +494,29 @@
    weight (--ow) down its sides. The hand is clipped just above any closing stroke at its wrist
    (--clip) and overlaps the arm by 2 viewBox units, so there is no seam. The few tilts sit on
    the bar with its origin at the bottom, so the visualiser only changes height. */
+.meet-lolla .ml-crowd-shadow {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(300 * var(--u));
+  color: var(--ml-crowd-shadow);
+}
+.meet-lolla .ml-crowd-shadow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
 .meet-lolla .ml-hand {
-  --s: var(--s0);
+  --s: calc(var(--s0) * var(--u));
   --bw: calc(var(--s) * var(--aw));
   position: absolute;
   bottom: -6px;
   left: var(--x);
   z-index: var(--z, 1);
   width: var(--bw);
-  height: calc(var(--h0) + var(--lvl, 0) * var(--hr));
+  height: calc((var(--h0) + var(--lvl, 0) * var(--hr)) * var(--u) + 6px);
   margin-left: calc(var(--bw) / -2);
   background: var(--arm);
   box-shadow:
@@ -784,12 +803,6 @@
   .meet-lolla .ml-city,
   .meet-lolla .ml-crowd {
     --bar-h: 152px;
-    --crowd-h: calc(222px + var(--bar-h));
-    --hr: 52px;
-    --rest-h: 160px;
-  }
-  .meet-lolla .ml-hand {
-    --s: calc(var(--s0) * 0.7);
   }
   .meet-lolla .ml-hand[data-narrow="0"] {
     display: none;
