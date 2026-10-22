@@ -1,8 +1,8 @@
 // meet Lolla as an embeddable module: mount(el, { assetBase }) => { destroy() }.
 //
-// The 2017 Lollapalooza poster, as a player: one day of the lineup at a time (tabs), tap a name
-// to hear its 30s preview, shuffle across all four days, and the crowd of hands at the bottom is
-// the audio visualiser, holding up a "NOW: <ARTIST>" sign.
+// The 2017 Lollapalooza poster, as a player: the whole four-day lineup as one long poster, tap a
+// name to hear its 30s preview or shuffle across all of it. A crowd of hands pinned to the bottom
+// is the audio visualiser and holds up a "NOW: <ARTIST>" sign; the city skyline closes the page.
 //
 // Everything renders inside `el` under one .meet-lolla root that is its own scroller. Nothing
 // plays until a tap: the AudioContext is created on the first press of a name or Shuffle.
@@ -17,35 +17,43 @@ import { artists } from "./artists.js";
 import { days } from "./lineup.js";
 
 const ADVANCE_MS = 30_000;   // each preview is a 30s clip
-const SWIPE_PX = 60;
+const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this long of the user scrolling
 
 const instances = new WeakMap();
 let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
-
-// The crowd (src/svg/poster/hands/hands.md): [hand, left %, tilt deg, size px, z, rest height px,
-// kept on narrow screens]. Fixed, irregular positions so the crowd is the same on every load.
+// The crowd (positions from src/svg/poster/hands/hands.md): [hand, left %, tilt deg, size px, z,
+// rest height px, kept on narrow screens]. Fixed, irregular positions so the crowd is the same on
+// every load. Most hands are upright; a few lean slightly.
 const CROWD = [
-  ["h1b", 2.0, -14, 98, 2, 26, 1], ["claw", 5.6, 6, 112, 3, 38, 1], ["h2", 10.8, -4, 82, 1, 10, 0],
-  ["h5", 13.4, 10, 100, 2, 32, 1], ["h3b", 16.2, -8, 96, 1, 20, 0], ["h4", 23.8, 3, 104, 2, 42, 1],
-  ["h7", 27.0, 14, 84, 3, 14, 0], ["rock", 31.4, -6, 110, 4, 46, 1], ["h6b", 33.4, 9, 98, 2, 28, 0],
-  ["h1", 38.2, -16, 96, 1, 20, 1], ["h4", 45.8, 12, 98, 2, 36, 1], ["eye", 49.0, -3, 104, 3, 24, 0],
-  ["h2", 51.6, 8, 84, 4, 16, 1], ["h3", 57.2, -12, 100, 2, 40, 1], ["h5", 63.0, 4, 98, 1, 22, 0],
-  ["h7", 65.6, -9, 84, 3, 12, 1], ["h6", 68.4, 15, 100, 2, 34, 0], ["peace", 75.8, -10, 110, 3, 44, 1],
-  ["h1b", 79.6, 7, 96, 2, 26, 1], ["h4", 85.2, -5, 100, 1, 38, 0], ["h3b", 90.8, 11, 98, 2, 24, 1],
-  ["h5", 96.4, -18, 100, 3, 30, 1],
+  ["h1b", 2.0, -6, 98, 2, 26, 1], ["claw", 5.6, 0, 112, 3, 38, 1], ["h2", 10.8, 0, 82, 1, 10, 0],
+  ["h5", 13.4, 0, 100, 2, 32, 1], ["h3b", 16.2, 0, 96, 1, 20, 0], ["h4", 23.8, 0, 104, 2, 42, 1],
+  ["h7", 27.0, 5, 84, 3, 14, 0], ["rock", 31.4, 0, 110, 4, 46, 1], ["h6b", 33.4, 0, 98, 2, 28, 0],
+  ["h1", 38.2, -4, 96, 1, 20, 1], ["h4", 45.8, 0, 98, 2, 36, 1], ["eye", 49.0, 0, 104, 3, 24, 0],
+  ["h2", 51.6, 0, 84, 4, 16, 1], ["h3", 57.2, 0, 100, 2, 40, 1], ["h5", 63.0, 0, 98, 1, 22, 0],
+  ["h7", 65.6, 0, 84, 3, 12, 1], ["h6", 68.4, 6, 100, 2, 34, 0], ["peace", 75.8, 0, 110, 3, 44, 1],
+  ["h1b", 79.6, 0, 96, 2, 26, 1], ["h4", 85.2, 0, 100, 1, 38, 0], ["h3b", 90.8, 0, 98, 2, 24, 1],
+  ["h5", 96.4, -7, 100, 3, 30, 1],
 ];
-// hand -> [file under src/, wrist x as a fraction of the hand box, arm colour or arm tile file]
+// hand -> [file under src/, wrist left and right edge, clip line (all in the 300-unit viewBox,
+// measured from the rendered SVGs), arm: skin colour sampled at the wrist or an arm tile, outline
+// width in units]. The arm is exactly as wide as the wrist and centred on it; the hand is clipped
+// at the clip line (below it some hands draw a closing stroke) and overlaps the arm by 2 units,
+// so hand and arm read as one limb.
 const HANDS = {
-  h1: ["img/hand1.svg", 0.486, "#ec9683"], h1b: ["svg/poster/hands/hand1-band.svg", 0.486, "#ec9683"],
-  h2: ["img/hand2.svg", 0.517, "#c66e34"],
-  h3: ["img/hand3.svg", 0.557, "#e3937c"], h3b: ["svg/poster/hands/hand3-band.svg", 0.557, "#e3937c"],
-  h4: ["img/hand4.svg", 0.457, "#f6ba98"], h5: ["img/hand5.svg", 0.457, "#c66e34"],
-  h6: ["img/hand6.svg", 0.571, "#c66e34"], h6b: ["svg/poster/hands/hand6-band.svg", 0.571, "#8a4a22"],
-  h7: ["img/hand7.svg", 0.517, "#e3937c"],
-  claw: ["svg/poster/hands/hand-monster-claw.svg", 0.5, "svg/poster/hands/arm-claw.svg"],
-  rock: ["svg/poster/hands/hand-monster-rock.svg", 0.5, "svg/poster/hands/arm-rock.svg"],
-  eye: ["svg/poster/hands/hand-monster-eye.svg", 0.5, "svg/poster/hands/arm-eye.svg"],
-  peace: ["svg/poster/hands/hand-monster-peace.svg", 0.5, "svg/poster/hands/arm-peace.svg"],
+  h1: ["img/hand1.svg", 119, 175.5, 291, "#ec9683", 0.5],
+  h1b: ["svg/poster/hands/hand1-band.svg", 119, 175.5, 291, "#ec9683", 0.5],
+  h2: ["img/hand2.svg", 119, 189.5, 300, "#c66e34", 1],
+  h3: ["img/hand3.svg", 145, 193.5, 300, "#e3937c", 1],
+  h3b: ["svg/poster/hands/hand3-band.svg", 145, 193.5, 300, "#e3937c", 1],
+  h4: ["img/hand4.svg", 111, 163.5, 300, "#f6ba98", 1],
+  h5: ["img/hand5.svg", 111, 163.5, 300, "#c66e34", 1],
+  h6: ["img/hand6.svg", 145, 193.5, 300, "#c66e34", 1],
+  h6b: ["svg/poster/hands/hand6-band.svg", 145, 193.5, 300, "#c66e34", 1],
+  h7: ["img/hand7.svg", 119, 189.5, 300, "#e3937c", 1],
+  claw: ["svg/poster/hands/hand-monster-claw.svg", 121.5, 178, 296, "svg/poster/hands/arm-claw.svg", 0],
+  rock: ["svg/poster/hands/hand-monster-rock.svg", 121.5, 178, 296, "svg/poster/hands/arm-rock.svg", 0],
+  eye: ["svg/poster/hands/hand-monster-eye.svg", 121.5, 178, 296, "svg/poster/hands/arm-eye.svg", 0],
+  peace: ["svg/poster/hands/hand-monster-peace.svg", 121.5, 178, 296, "svg/poster/hands/arm-peace.svg", 0],
 };
 // bar -> analyser bin (fftSize 64 gives 32 bins; an mp3 has little above bin 22). Scrambled so
 // the bass doesn't all land on the left of the crowd.
@@ -65,43 +73,46 @@ const fontFaces = (base) => {
 
 const speakerSvg = `<svg class="ml-speaker" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9.5h3.6L11.5 5v14l-4.9-4.5H3z" fill="currentColor"/><g class="ml-speaker-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 9.2a4 4 0 0 1 0 5.6"/><path d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/></g><g class="ml-speaker-off" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g></svg>`;
 const shuffleSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c4.5 0 6.5 10 11 10H21"/><path d="M3 17h3.5c1.8 0 3-1.6 4.1-3.5M13.4 10.5C14.5 8.6 15.7 7 17.5 7H21"/><path d="M18.5 4.5L21 7l-2.5 2.5M18.5 14.5L21 17l-2.5 2.5"/></svg>`;
+const star = `<span class="ml-star" aria-hidden="true">★</span>`;
 
 const markup = (uid) => `
+<div class="ml-pin-top">
+  <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
+</div>
 <header class="ml-top">
   <div class="ml-sun" aria-hidden="true">${sunSvg}</div>
   <div class="ml-clouds" aria-hidden="true">${cloudsSvg}</div>
   <div class="ml-masthead">
-    <p class="ml-when"><span class="ml-when-day"></span> <span class="ml-when-date"></span></p>
     <h1 class="ml-logo"><span class="ml-sr">meet Lollapalooza</span>${logoSvg}</h1>
-    <p class="ml-where"><span>Grant Park</span> <span>Chicago</span></p>
+    <p class="ml-info">
+      <span class="ml-when"><span class="ml-when-days">August 3-6</span> <span class="ml-when-year">${star} 2017 ${star}</span></span>
+      <span class="ml-where"><span>Grant Park</span> <span>Chicago</span></span>
+    </p>
   </div>
-  <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
 </header>
-<main class="ml-stage">
-  <div class="ml-bar-row">
-    <div class="ml-tabs" role="tablist" aria-label="Festival day">${days.map((d) => `
-      <button type="button" role="tab" class="ml-tab" id="ml-tab-${uid}-${d.id}" data-day="${d.id}" aria-controls="ml-panel-${uid}" aria-label="${d.label}" aria-selected="false" tabindex="-1"><abbr title="${d.label}">${d.label.slice(0, 3)}</abbr></button>`).join("")}
-    </div>
-    <button type="button" class="ml-shuffle">${shuffleSvg}<span>Shuffle</span></button>
-  </div>
-  <section class="ml-lineup" id="ml-panel-${uid}" role="tabpanel"></section>
-  <div class="ml-city" aria-hidden="true">
-    <div class="ml-sky ml-sky-back">${skylineBackSvg}</div>
-    <div class="ml-sky ml-sky-front">${skylineFrontSvg}</div>
-  </div>
-  <div class="ml-crowd">
-    <div class="ml-sign">
-      <p class="ml-sign-text" aria-live="polite"></p>
+<main class="ml-lineup" aria-label="Lineup">${days.map((d) => `
+  <section class="ml-dayblock" data-day="${d.id}" aria-labelledby="ml-day-${uid}-${d.id}">
+    <h2 class="ml-day" id="ml-day-${uid}-${d.id}"><span>${d.label}</span><span class="ml-sr">, ${d.date}</span></h2>
+  </section>`).join("")}
+</main>
+<div class="ml-city" aria-hidden="true">
+  <div class="ml-sky ml-sky-back">${skylineBackSvg}</div>
+  <div class="ml-sky ml-sky-front">${skylineFrontSvg}</div>
+</div>
+<div class="ml-crowd">
+  <div class="ml-visual" aria-hidden="true"></div>
+  <div class="ml-sign" role="region" aria-label="Now playing">
+    <p class="ml-sign-text" aria-live="polite"></p>
+    <div class="ml-sign-actions">
+      <button type="button" class="ml-shuffle">${shuffleSvg}<span>Shuffle</span></button>
       <a class="ml-youtube" target="_blank" rel="noopener" hidden>Full song on YouTube</a>
     </div>
-    <div class="ml-visual" aria-hidden="true"></div>
   </div>
+  <footer class="ml-footer">
+    <p>Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017. A school project, restyled in 2026 after the official poster art.</p>
+  </footer>
   <audio class="ml-audio" preload="none" crossorigin="anonymous"></audio>
-</main>
-<footer class="ml-footer">
-  <p>Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017. A school project, restyled in 2026 after the official poster art.
-  <a href="https://en.wikipedia.org/wiki/List_of_Lollapalooza_lineups_by_year#2017" target="_blank" rel="noopener">Lollapalooza 2017 lineup</a></p>
-</footer>`;
+</div>`;
 
 const el = (tag, cls, text) => {
   const node = document.createElement(tag);
@@ -139,28 +150,41 @@ export function mount(host, { assetBase = "" } = {}) {
   const audio = /** @type {HTMLAudioElement} */ ($(".ml-audio"));
   const muteBtn = $(".ml-mute");
   const shuffleBtn = $(".ml-shuffle");
-  const tabs = [...root.querySelectorAll(".ml-tab")];
-  const panel = $(".ml-lineup");
-  const whenDay = $(".ml-when-day");
-  const whenDate = $(".ml-when-date");
+  const lineup = $(".ml-lineup");
+  const sign = $(".ml-sign");
   const signText = $(".ml-sign-text");
   const linkEl = /** @type {HTMLAnchorElement} */ ($(".ml-youtube"));
   const city = $(".ml-city");
-  const crowd = $(".ml-crowd");
   const visual = $(".ml-visual");
   for (const svg of root.querySelectorAll(".ml-logo svg, .ml-sun svg, .ml-clouds svg, .ml-city svg")) {
     svg.setAttribute("aria-hidden", "true");
     svg.setAttribute("focusable", "false");
   }
 
+  // --- wordmark sticker outline ----------------------------------------------------------
+  // Each letter gets a white halo: a copy of it, stroked thick in white, in a layer behind all
+  // the letters. The copy keeps the letter's class, so it pops in with its letter (same
+  // keyframes, timing and origin), and the halos merge into one white border once all are in.
+  const logo = $(".ml-logo svg");
+  const halos = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  halos.setAttribute("class", "ml-halos");
+  for (const letter of logo.querySelectorAll(':scope > [class^="ml-logo-"]')) {
+    const copy = /** @type {Element} */ (letter.cloneNode(true));
+    copy.classList.add("ml-halo");
+    halos.append(copy);
+  }
+  logo.prepend(halos);
+
   // --- the crowd -----------------------------------------------------------------------
   const src = (f) => `url(${JSON.stringify(assetBase + "src/" + f)})`;
   const bars = CROWD.map(([k, x, tilt, size, z, h0, keep]) => {
-    const [hand, wx, arm] = HANDS[k];
+    const [hand, l, r, clip, arm, outline] = HANDS[k];
+    const u = (v) => (v / 300).toFixed(4);   // viewBox units -> fraction of the hand size
     const bar = el("div", "ml-hand");
     bar.dataset.narrow = String(keep);
     const set = (p, v) => bar.style.setProperty(p, v);
-    set("--x", `${x}%`); set("--tilt", `${tilt}deg`); set("--s0", `${size}px`); set("--wx", String(wx));
+    set("--x", `${x}%`); set("--tilt", `${tilt}deg`); set("--s0", `${size}px`);
+    set("--aw", u(r - l)); set("--wx", u((l + r) / 2)); set("--clip", u(300 - clip)); set("--ow", u(outline));
     set("--z", String(z)); set("--h0", `${h0}px`); set("--hand", src(hand));
     set("--arm", arm.startsWith("#") ? arm : `${src(arm)} 0 0 / 100% auto repeat-y`);
     visual.append(bar);
@@ -168,15 +192,15 @@ export function mount(host, { assetBase = "" } = {}) {
   });
 
   // --- state ---------------------------------------------------------------------------
-  let dayId = days[0].id;
   /** @type {(typeof playable)[number] | null} */ let current = null;
   let destroyed = false;
   /** @type {AudioContext | null} */ let ctx = null;
   /** @type {AnalyserNode | null} */ let analyser = null;
   let freq = new Uint8Array(0);
   let timer = 0, raf = 0, scrollRaf = 0, fitRaf = 0;
+  let lastUserScroll = -Infinity, ownScrollUntil = 0;
 
-  // --- lineup --------------------------------------------------------------------------
+  // --- lineup: all four days, like the admat -------------------------------------------
   function nameNode(entry) {
     if (!entry.slug) return el("span", "ml-name ml-name-off", entry.name);
     const b = el("button", "ml-name", entry.name);
@@ -193,41 +217,26 @@ export function mount(host, { assetBase = "" } = {}) {
     for (const dot of row.querySelectorAll(".ml-dot")) dot.setAttribute("aria-hidden", "true");
     return row;
   }
-
-  function renderDay() {
-    const day = days.find((d) => d.id === dayId);
-    whenDay.textContent = day.label;
-    whenDate.textContent = day.date;
-    for (const t of tabs) {
-      const on = t.dataset.day === dayId;
-      t.setAttribute("aria-selected", String(on));
-      t.tabIndex = on ? 0 : -1;
-    }
-    panel.setAttribute("aria-labelledby", `ml-tab-${uid}-${dayId}`);
-    const heading = el("h2", "ml-day");
-    heading.append(el("span", "", day.label));
-    const rows = day.rows.map((r, i) => rowNode(r, i ? "ml-row" : "ml-row ml-row-top"));
-    const nodes = [heading, ...rows];
+  for (const block of lineup.querySelectorAll(".ml-dayblock")) {
+    const day = days.find((d) => d.id === block.dataset.day);
+    block.append(...day.rows.map((r, i) => rowNode(r, i ? "ml-row" : "ml-row ml-row-top")));
     if (day.also.length) {
       const also = rowNode(day.also, "ml-row ml-row-also");
       also.prepend(el("span", "ml-also-label", "Also:"));
-      nodes.push(also);
+      block.append(also);
     }
-    panel.replaceChildren(...nodes);
-    markPlaying();
-    fitNow();   // before paint, so a new day never flashes unfitted rows
   }
 
   function markPlaying() {
-    for (const b of panel.querySelectorAll("button.ml-name")) {
+    for (const b of lineup.querySelectorAll("button.ml-name")) {
       const on = !!current && b.dataset.slug === current.slug;
       b.classList.toggle("ml-is-playing", on);
       if (on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current");
     }
   }
 
-  // Rows are sized like the poster: a day shares one base size, chosen so its rows fit the
-  // width (each may grow a little to fill); a row that nearly fills it is justified, shorter
+  // Rows are sized like the poster: one base size for the whole lineup, chosen so the rows fit
+  // the width (each may grow a little to fill); a row that nearly fills it is justified, shorter
   // ones are centred, and on narrow screens a row that would get too small is split into
   // balanced lines. Widths scale linearly with font size: one measurement per row suffices.
   function fit() {
@@ -235,14 +244,14 @@ export function mount(host, { assetBase = "" } = {}) {
     fitRaf = requestAnimationFrame(() => { fitRaf = 0; fitNow(); });
   }
   function fitNow() {
-    const rows = [...panel.querySelectorAll(".ml-row")];
-    const cs = getComputedStyle(panel);
-    const W = panel.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const rows = [...lineup.querySelectorAll(".ml-row")];
+    const cs = getComputedStyle(lineup);
+    const W = lineup.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     if (!rows.length || W <= 0) return;
     const REF = 20;
-    for (const br of panel.querySelectorAll(".ml-br")) br.remove();
-    for (const d of panel.querySelectorAll(".ml-dot-br")) d.classList.remove("ml-dot-br");
-    panel.classList.add("ml-measuring");
+    for (const br of lineup.querySelectorAll(".ml-br")) br.remove();
+    for (const d of lineup.querySelectorAll(".ml-dot-br")) d.classList.remove("ml-dot-br");
+    lineup.classList.add("ml-measuring");
     for (const r of rows) r.style.setProperty("--fs", `${REF}px`);
     const k = rows.map((r) => r.scrollWidth / REF);
     // each child's left edge, in em
@@ -250,7 +259,7 @@ export function mount(host, { assetBase = "" } = {}) {
       const x0 = r.getBoundingClientRect().left;
       return [...r.children].map((c) => ({ c, x: (c.getBoundingClientRect().left - x0) / REF }));
     });
-    panel.classList.remove("ml-measuring");
+    lineup.classList.remove("ml-measuring");
     const isTop = (r) => r.classList.contains("ml-row-top");
     const isAlso = (r) => r.classList.contains("ml-row-also");
     const minFit = Math.min(...rows.filter((r) => !isTop(r) && !isAlso(r)).map((r) => W / k[rows.indexOf(r)]));
@@ -265,7 +274,7 @@ export function mount(host, { assetBase = "" } = {}) {
       r.classList.toggle("ml-justify", fill <= 1.001 && fill > 0.8 && !isAlso(r));
       if (fill > 1.001) breakRow(r, parts[i], k[i], Math.ceil(fill / 0.97));
     });
-    panel.style.setProperty("--ml-base", `${base.toFixed(2)}px`);
+    lineup.style.setProperty("--ml-base", `${base.toFixed(2)}px`);
   }
 
   // Split a row that is too wide into `lines` balanced, centred lines, breaking at bullets
@@ -285,14 +294,6 @@ export function mount(host, { assetBase = "" } = {}) {
       best.c.classList.add("ml-dot-br");
       best.c.after(el("span", "ml-br"));
     }
-  }
-
-  function selectDay(id, { focus = false } = {}) {
-    if (id !== dayId) {
-      dayId = id;
-      renderDay();
-    }
-    if (focus) tabs.find((t) => t.dataset.day === id)?.focus();
   }
 
   // --- audio ---------------------------------------------------------------------------
@@ -335,36 +336,40 @@ export function mount(host, { assetBase = "" } = {}) {
     return e;
   }
 
-  // Bring the playing name into view inside the root (never scrollIntoView: it would scroll
-  // the host page too), above the crowd that covers the bottom of the scroller.
+  // Bring the playing name into view inside the root (never scrollIntoView: it would scroll the
+  // host page too), between the top and the pinned sign/crowd. Returns quietly if it's visible.
   function reveal(slug) {
-    const b = panel.querySelector(`button.ml-name[data-slug="${CSS.escape(slug)}"]`);
+    const b = lineup.querySelector(`button.ml-name[data-slug="${CSS.escape(slug)}"]`);
     if (!b) return;
     const r = root.getBoundingClientRect();
     const box = b.getBoundingClientRect();
     const top = box.top - r.top;
-    const bottomLimit = root.clientHeight - crowd.offsetHeight * 0.75;
-    if (top >= 8 && box.bottom - r.top <= bottomLimit) return;
+    const clearBottom = Math.min(root.clientHeight, sign.getBoundingClientRect().top - r.top) - 8;
+    if (top >= 8 && box.bottom - r.top <= clearBottom) return;
+    ownScrollUntil = performance.now() + 1500;
     root.scrollTo({
-      top: Math.max(0, root.scrollTop + top - Math.max(8, (bottomLimit - box.height) / 2)),
+      top: Math.max(0, root.scrollTop + top - Math.max(8, (clearBottom - box.height) / 2)),
       behavior: still() ? "auto" : "smooth",
     });
   }
 
-  function shuffle({ follow = true } = {}) {
-    const prevDay = current?.day;
+  function shuffle() {
     const e = pickRandom();
-    // Auto-advance only moves the tabs when the listener is following the music: they are on
-    // the playing day and not keyboard-focused inside the lineup.
-    const move = follow || (dayId === prevDay && !panel.contains(document.activeElement));
-    if (move) selectDay(e.day);
     play(e);
-    if (follow) reveal(e.slug);
+    reveal(e.slug);
+  }
+
+  // Auto-advance follows along only if the listener isn't reading elsewhere: it scrolls to the
+  // new name only when that name is off screen and the user hasn't scrolled for a few seconds.
+  function advance() {
+    const e = pickRandom();
+    play(e);
+    if (performance.now() - lastUserScroll > USER_SCROLL_QUIET_MS) reveal(e.slug);
   }
 
   function restartTimer() {
     clearInterval(timer);
-    timer = setInterval(() => shuffle({ follow: false }), ADVANCE_MS);
+    timer = setInterval(advance, ADVANCE_MS);
   }
 
   function frame() {
@@ -386,40 +391,17 @@ export function mount(host, { assetBase = "" } = {}) {
   }
 
   // --- events --------------------------------------------------------------------------
-  panel.addEventListener("click", (ev) => {
+  lineup.addEventListener("click", (ev) => {
     const b = /** @type {HTMLElement} */ (ev.target).closest?.("button.ml-name");
     if (!b) return;
     const entry = playable.find((e) => e.slug === b.dataset.slug);
     if (!entry) return;
     ensureGraph();
     play(entry);
+    reveal(entry.slug);   // e.g. tapped while half under the sign
   }, { signal });
 
   shuffleBtn.addEventListener("click", () => { ensureGraph(); shuffle(); }, { signal });
-
-  for (const t of tabs) t.addEventListener("click", () => selectDay(t.dataset.day), { signal });
-  $(".ml-tabs").addEventListener("keydown", (ev) => {
-    const i = tabs.findIndex((t) => t.dataset.day === dayId);
-    const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[ev.key];
-    if (to == null) return;
-    ev.preventDefault();
-    selectDay(tabs[(to + tabs.length) % tabs.length].dataset.day, { focus: true });
-  }, { signal });
-
-  // Swipe between days on touch screens.
-  let touch = null;
-  panel.addEventListener("touchstart", (ev) => {
-    touch = ev.touches.length === 1 ? { x: ev.touches[0].clientX, y: ev.touches[0].clientY } : null;
-  }, { passive: true, signal });
-  panel.addEventListener("touchend", (ev) => {
-    if (!touch) return;
-    const t = ev.changedTouches[0];
-    const dx = t.clientX - touch.x, dy = t.clientY - touch.y;
-    touch = null;
-    if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    const i = days.findIndex((d) => d.id === dayId) + (dx < 0 ? 1 : -1);
-    if (i >= 0 && i < days.length) selectDay(days[i].id);
-  }, { passive: true, signal });
 
   function setMuted(m) {
     audio.muted = m;
@@ -441,19 +423,23 @@ export function mount(host, { assetBase = "" } = {}) {
   function applyScroll() {
     scrollRaf = 0;
     const view = root.scrollTop + root.clientHeight;
-    const p = clamp((view - city.offsetTop) / (city.offsetHeight + crowd.offsetHeight * 0.5), 0, 1);
+    const p = clamp((view - city.offsetTop) / city.offsetHeight, 0, 1);
     city.style.setProperty("--ml-p", p.toFixed(4));
   }
-  const onScroll = () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); };
+  const onScroll = () => {
+    if (performance.now() > ownScrollUntil) lastUserScroll = performance.now();
+    if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll);
+  };
   root.addEventListener("scroll", onScroll, { passive: true, signal });
 
-  const ro = new ResizeObserver(() => { fit(); onScroll(); });
-  ro.observe(panel);
+  const ro = new ResizeObserver(() => { fit(); if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); });
+  ro.observe(lineup);
   // Row widths depend on the font: refit once it has loaded.
-  document.fonts?.load('600 20px "ML Antonio"').then(() => { if (!destroyed) { fit(); onScroll(); } }, () => {});
+  document.fonts?.load('600 20px "ML Antonio"').then(() => { if (!destroyed) fit(); }, () => {});
 
   signText.textContent = "Tap a name";
-  renderDay();
+  fitNow();
+  applyScroll();
 
   const instance = {
     destroy() {

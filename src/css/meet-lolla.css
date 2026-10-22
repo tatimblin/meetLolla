@@ -132,6 +132,7 @@
   bottom: calc(var(--ch) * 0.2);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "when logo where";
   align-items: center;
   gap: 2cqi;
   padding: 0 4.5cqi;
@@ -142,14 +143,33 @@
   text-transform: uppercase;
   color: var(--ml-navy);
 }
-.meet-lolla .ml-when span,
-.meet-lolla .ml-where span {
-  display: block;
+.meet-lolla .ml-info {
+  display: contents;
+}
+.meet-lolla .ml-when {
+  grid-area: when;
+  text-align: center;
+  justify-self: start;
 }
 .meet-lolla .ml-where {
-  text-align: right;
+  grid-area: where;
+  text-align: center;
+  justify-self: end;
+}
+.meet-lolla .ml-when > span,
+.meet-lolla .ml-where > span {
+  display: block;
+}
+.meet-lolla .ml-when-year {
+  letter-spacing: 0.16em;
+}
+.meet-lolla .ml-star {
+  font-size: 0.6em;
+  vertical-align: 0.25em;
+  letter-spacing: 0;
 }
 .meet-lolla .ml-logo {
+  grid-area: logo;
   width: clamp(130px, 37cqi, 540px);
   margin-bottom: calc(var(--ch) * -0.03);
 }
@@ -157,19 +177,35 @@
   width: 100%;
   height: auto;
 }
-/* "meet" is teal script in the mark; on the yellow sun it vanished. Navy with a white halo. */
-.meet-lolla .ml-logo-meet,
-.meet-lolla .ml-logo-meet path {
-  fill: var(--ml-navy);
+/* The poster's sticker look: every letter sits on a thick white outline. mount() puts a copy of
+   each letter in .ml-halos (behind all letters); the copies animate with their letters. */
+.meet-lolla .ml-halo,
+.meet-lolla .ml-halo path {
+  fill: #fff;
   stroke: #fff;
-  stroke-width: 3.5px;
+  stroke-width: 9px;
   stroke-linejoin: round;
-  paint-order: stroke;
+  stroke-linecap: round;
+}
+/* "meet" is teal script in the mark; on the yellow sun it vanished. Navy, on its own halo. */
+.meet-lolla .ml-logo-meet:not(.ml-halo),
+.meet-lolla .ml-logo-meet:not(.ml-halo) path {
+  fill: var(--ml-navy);
+}
+.meet-lolla .ml-halo.ml-logo-meet,
+.meet-lolla .ml-halo.ml-logo-meet path {
+  stroke-width: 6px;
 }
 
+/* Mute stays in the top-right corner of the scroller: a zero-height sticky strip. */
+.meet-lolla .ml-pin-top {
+  position: sticky;
+  z-index: 8;
+  top: 0;
+  height: 0;
+}
 .meet-lolla .ml-mute {
   position: absolute;
-  z-index: 5;
   top: 10px;
   right: 10px;
   display: grid;
@@ -302,89 +338,27 @@
   100% { opacity: 1; transform: scale(1) translateY(0px); }
 }
 
-/* ---- Day tabs + shuffle -------------------------------------------------------------- */
-.meet-lolla .ml-bar-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px 18px;
-  padding: 14px 16px 0;
-}
-.meet-lolla .ml-tabs {
-  display: flex;
-  gap: 6px;
-}
-.meet-lolla .ml-tab {
-  min-width: 56px;
-  min-height: 40px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--ml-navy);
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: background-color 150ms ease, transform 150ms ease;
-}
-.meet-lolla .ml-tab:hover {
-  background: #fffbd6;
-}
-.meet-lolla .ml-tab[aria-selected="true"] {
-  background: var(--ml-sun);
-  box-shadow: inset 0 -3px 0 var(--ml-navy);
-  transform: translateY(-1px);
-}
-.meet-lolla .ml-shuffle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 4px 18px 4px 14px;
-  border-radius: 999px;
-  background: var(--ml-navy);
-  color: var(--ml-sun);
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transform: rotate(-2deg);
-  box-shadow: 0 3px 0 rgba(10, 40, 80, 0.3);
-  transition: transform 150ms ease;
-}
-.meet-lolla .ml-shuffle:hover {
-  transform: rotate(-2deg) scale(1.04);
-}
-.meet-lolla .ml-shuffle:active {
-  transform: rotate(-2deg) scale(0.97);
-}
-.meet-lolla .ml-shuffle svg {
-  width: 22px;
-  height: 22px;
-}
-.meet-lolla .ml-shuffle:focus-visible,
-.meet-lolla .ml-tab:focus-visible {
-  outline-color: #fff;
-}
 
-/* ---- Lineup: one day, rows sized and justified like the poster ------------------------- */
+/* ---- Lineup: all four days, rows sized and justified like the poster ------------------- */
 .meet-lolla .ml-lineup {
   --ml-base: 26px;
   position: relative;
   z-index: 1;
+  display: block;
   max-width: 1020px;
   margin: 0 auto;
-  padding: 6px clamp(16px, 4cqi, 48px) 0;
+  padding: 8px clamp(16px, 4cqi, 48px) 14px;
   color: #fff;
   text-align: center;
-  touch-action: pan-y;
+}
+.meet-lolla .ml-dayblock + .ml-dayblock {
+  margin-top: calc(var(--ml-base) * 0.55);
 }
 .meet-lolla .ml-day {
   display: flex;
   align-items: center;
   gap: 0.6em;
-  margin: 0.35em 0 0.3em;
+  margin: 0.2em 0 0.25em;
   font-weight: 700;
   font-size: calc(var(--ml-base) * 1.3);
   line-height: 1.2;
@@ -436,7 +410,7 @@
   margin-bottom: 0.08em;
 }
 .meet-lolla .ml-row-also {
-  margin-top: 0.7em;
+  margin-top: 0.5em;
   font-weight: 500;
 }
 .meet-lolla .ml-also-label {
@@ -487,19 +461,22 @@
   border-radius: 3px;
 }
 
-/* ---- City: two skyline layers; they rise as they scroll into view (--ml-p 0..1) -------- */
-.meet-lolla .ml-stage {
-  --crowd-h: 262px;
-  --hr: 92px;
-  --sky-h: clamp(190px, 24cqi, 340px);
-  position: relative;
-  display: block;
+/* ---- Sizes shared by the city and the pinned crowd ------------------------------------ */
+.meet-lolla .ml-city,
+.meet-lolla .ml-crowd {
+  --band-h: 34px;                                   /* the credit band under the hands */
+  --crowd-h: calc(250px + var(--band-h));           /* pinned: hands + band */
+  --hr: 92px;                                       /* how far a hand rises at full level */
+  --sign-bottom: calc(var(--band-h) + 98px);
 }
+
+/* ---- City: at the very end of the page, behind the crowd. The two layers rise as it
+   scrolls into view (--ml-p 0..1). Its height keeps the last lineup row clear of the crowd
+   and the sign when scrolled to the end. ------------------------------------------------- */
 .meet-lolla .ml-city {
   --ml-p: 1;
   position: relative;
-  height: calc(var(--sky-h) + var(--crowd-h) * 0.5);
-  margin-top: 28px;
+  height: calc(var(--crowd-h) + clamp(48px, 7cqi, 120px));
   overflow: hidden;
 }
 .meet-lolla .ml-sky {
@@ -510,20 +487,20 @@
   will-change: transform;
 }
 .meet-lolla .ml-sky-back {
-  height: calc(var(--sky-h) * 0.85 + var(--crowd-h) * 0.5);
+  height: 100%;
   color: var(--ml-sky-back);
   transform: translateY(calc((1 - var(--ml-p)) * 90px));
 }
 .meet-lolla .ml-sky-front {
-  height: calc(var(--sky-h) * 0.45 + var(--crowd-h) * 0.5);
+  height: 62%;
   color: var(--ml-sky-front);
   transform: translateY(calc((1 - var(--ml-p)) * 36px));
 }
 
-/* ---- Crowd: the visualiser, stuck to the bottom of the scroller ------------------------ */
+/* ---- Crowd: the visualiser, pinned to the bottom of the scroller ----------------------- */
 .meet-lolla .ml-crowd {
   position: sticky;
-  z-index: 3;
+  z-index: 5;
   bottom: 0;
   height: var(--crowd-h);
   margin-top: calc(var(--crowd-h) * -1);
@@ -531,14 +508,20 @@
 }
 .meet-lolla .ml-visual {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--band-h);
   overflow: hidden;
 }
-/* hands.md: the bar is the arm, ::before the hand. The tilt sits on the bar with its origin at
-   the bottom, so the visualiser only changes height. */
+/* hands.md: the bar is the arm, ::before the hand. The arm is exactly the hand's wrist width
+   (--aw), centred on the wrist (--wx), in the skin colour sampled there, with the hand's outline
+   weight (--ow) down its sides. The hand is clipped just above any closing stroke at its wrist
+   (--clip) and overlaps the arm by 2 viewBox units, so there is no seam. The few tilts sit on
+   the bar with its origin at the bottom, so the visualiser only changes height. */
 .meet-lolla .ml-hand {
   --s: var(--s0);
-  --bw: calc(var(--s) * 0.17);
+  --bw: calc(var(--s) * var(--aw));
   position: absolute;
   bottom: -6px;
   left: var(--x);
@@ -547,6 +530,9 @@
   height: calc(var(--h0) + var(--lvl, 0) * var(--hr));
   margin-left: calc(var(--bw) / -2);
   background: var(--arm);
+  box-shadow:
+    inset calc(var(--s) * var(--ow)) 0 0 #1d1d1b,
+    inset calc(var(--s) * var(--ow) * -1) 0 0 #1d1d1b;
   transform: rotate(var(--tilt));
   transform-origin: 50% 100%;
   transition: height 90ms linear;
@@ -556,19 +542,21 @@
   position: absolute;
   width: var(--s);
   height: var(--s);
-  bottom: calc(100% - var(--s) * 0.02);
+  bottom: calc(100% - var(--s) * (var(--clip) + 0.0067));
   left: calc(50% - var(--s) * var(--wx));
   background: var(--hand) top left / contain no-repeat;
+  clip-path: inset(0 0 calc(var(--clip) * 100%) 0);
 }
 
-/* The sign the crowd holds up, like the poster's @lollapalooza placard. */
+/* The sign the crowd holds up, like the poster's @lollapalooza placard; Shuffle lives on it
+   so it is always in reach on the long page. */
 .meet-lolla .ml-sign {
   position: absolute;
   z-index: 6;
   left: 6%;
-  bottom: 128px;
+  bottom: var(--sign-bottom);
   max-width: min(64cqi, 460px);
-  padding: 0.3em 0.65em 0.4em;
+  padding: 0.3em 0.65em 0.45em;
   background: #fff;
   color: var(--ml-red);
   box-shadow: 0 3px 0 rgba(10, 40, 80, 0.22);
@@ -585,9 +573,39 @@
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
+.meet-lolla .ml-sign-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 6px;
+}
+.meet-lolla .ml-shuffle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 2px 14px 2px 10px;
+  border-radius: 999px;
+  background: var(--ml-navy);
+  color: var(--ml-sun);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: transform 150ms ease;
+}
+.meet-lolla .ml-shuffle:hover {
+  transform: scale(1.05);
+}
+.meet-lolla .ml-shuffle:active {
+  transform: scale(0.96);
+}
+.meet-lolla .ml-shuffle svg {
+  width: 19px;
+  height: 19px;
+}
 .meet-lolla .ml-youtube {
-  display: inline-block;
-  margin-top: 2px;
   color: var(--ml-red-text);
   font-weight: 600;
   font-size: 14px;
@@ -598,43 +616,51 @@
 .meet-lolla .ml-youtube:hover {
   color: var(--ml-navy);
 }
-.meet-lolla .ml-youtube:focus-visible {
-  outline-offset: 2px;
+/* hold the sign still while it's being used */
+.meet-lolla .ml-sign:hover,
+.meet-lolla .ml-sign:focus-within {
+  animation-play-state: paused;
 }
 @keyframes ml-sign-sway {
   0%, 100% { transform: rotate(-4deg) translateY(0); }
   50% { transform: rotate(-2.2deg) translateY(-3px); }
 }
 
-/* ---- Footer ------------------------------------------------------------------------- */
+/* ---- Credit band: the poster's dark strip under the crowd ----------------------------- */
 .meet-lolla .ml-footer {
-  position: relative;
-  z-index: 4;
-  padding: 14px 16px 16px;
+  position: absolute;
+  z-index: 7;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--band-h);
+  padding: 0 16px;
   background: var(--ml-navy);
   color: #fff;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.25;
   letter-spacing: 0.03em;
   text-align: center;
+  pointer-events: auto;
 }
 .meet-lolla .ml-footer a {
   color: var(--ml-sun);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.meet-lolla .ml-footer a + a,
-.meet-lolla .ml-footer p > a:last-child {
-  margin-left: 0.4em;
-}
-.meet-lolla .ml-footer :focus-visible {
+.meet-lolla .ml-footer :focus-visible,
+.meet-lolla .ml-shuffle:focus-visible {
   outline-color: var(--ml-sun);
 }
 
 /* ---- Narrow containers (phones) ----------------------------------------------------- */
 @container meet-lolla (max-width: 600px) {
-  /* Phones: the cloud bank is cropped to its valley, so the header stacks: the wordmark on the
-     sun, and date + place as one line along the white cloud strip beneath it. */
+  /* The cloud bank is cropped to its valley, so the header stacks: the wordmark on the sun,
+     and "August 3-6, 2017 · Grant Park, Chicago" as one line along the white cloud strip. */
   .meet-lolla .ml-top {
     --ct: 12px;
     --ch: 132px;
@@ -652,43 +678,46 @@
     margin: 0;
     transform: translateX(-50%);
   }
-  .meet-lolla .ml-when,
-  .meet-lolla .ml-where {
+  .meet-lolla .ml-info {
     position: absolute;
-    top: calc(var(--ct) + var(--ch) * 0.825);
+    left: 0;
+    right: 0;
+    top: calc(var(--ct) + var(--ch) * 0.81);
+    display: block;
     transform: translateY(-50%);
     font-size: 14px;
     letter-spacing: 0.06em;
+    text-align: center;
     white-space: nowrap;
   }
-  .meet-lolla .ml-when {
-    left: 16px;
-  }
-  .meet-lolla .ml-where {
-    right: 16px;
-  }
-  .meet-lolla .ml-when span,
-  .meet-lolla .ml-where span {
+  .meet-lolla .ml-when > span,
+  .meet-lolla .ml-where > span {
     display: inline;
   }
-  .meet-lolla .ml-when-day::after {
+  .meet-lolla .ml-when-year {
+    letter-spacing: inherit;
+  }
+  .meet-lolla .ml-star {
+    display: none;
+  }
+  .meet-lolla .ml-when-days::after,
+  .meet-lolla .ml-where > span:first-child::after {
     content: ",";
   }
-  .meet-lolla .ml-where span:first-child::after {
-    content: ",";
+  .meet-lolla .ml-where::before {
+    content: "\00b7";
+    margin-right: 0.45em;
   }
   .meet-lolla .ml-mute {
     top: 8px;
     right: 8px;
   }
-  .meet-lolla .ml-tab {
-    min-width: 0;
-    padding: 4px 12px;
-    font-size: 17px;
-  }
-  .meet-lolla .ml-stage {
-    --crowd-h: 214px;
+  .meet-lolla .ml-city,
+  .meet-lolla .ml-crowd {
+    --band-h: 44px;
+    --crowd-h: calc(196px + var(--band-h));
     --hr: 62px;
+    --sign-bottom: calc(var(--band-h) + 70px);
   }
   .meet-lolla .ml-hand {
     --s: calc(var(--s0) * 0.82);
@@ -698,13 +727,16 @@
   }
   .meet-lolla .ml-sign {
     left: 4%;
-    bottom: 104px;
+    max-width: 78cqi;
   }
   .meet-lolla .ml-sign-text {
     font-size: 21px;
   }
   .meet-lolla .ml-youtube {
     font-size: 13px;
+  }
+  .meet-lolla .ml-footer {
+    font-size: 12px;
   }
 }
 
@@ -721,7 +753,6 @@
     animation: none;
   }
   .meet-lolla .ml-hand,
-  .meet-lolla .ml-tab,
   .meet-lolla .ml-shuffle,
   .meet-lolla .ml-name,
   .meet-lolla .ml-name::after {
