@@ -43,10 +43,29 @@ const CROWD = (() => {
   const small = new Set(["h2", "h7"]);   // fists read bigger, so draw them a little smaller
   // A strip much wider than any screen, centred on the page: a screen shows the middle of it
   // and hands load in or drop out at the edges as it resizes (see sizeCrowd). Pitch is in
-  // reference px. Each monster appears once, in the front row near the middle, five hands
-  // apart: a desktop shows all four, a phone the two in the centre (rock and peace).
+  // reference px. Each monster appears exactly once, in the front row within nine hands of the
+  // middle, at seeded random slots (the same on every load) with irregular gaps, never side by
+  // side, in a shuffled order; one stands within three hands of the middle so a phone shows it.
+  // The draw is made off a copy of the seed, so the rest of the crowd keeps its own draws.
   const HALF = 2400;
-  const MONSTERS = { [-7]: "claw", [-2]: "rock", 3: "peace", 8: "eye" };   // slot from the middle -> monster
+  const MONSTERS = (() => {   // slot from the middle -> monster
+    const s0 = seed;
+    const kinds = ["claw", "rock", "peace", "eye"];
+    for (let i = kinds.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [kinds[i], kinds[j]] = [kinds[j], kinds[i]];
+    }
+    let slots;
+    for (;;) {
+      const pick = new Set();
+      while (pick.size < 4) pick.add(Math.floor(rnd() * 19) - 9);
+      slots = [...pick].sort((a, b) => a - b);
+      const gaps = slots.slice(1).map((s, i) => s - slots[i]);
+      if (Math.min(...gaps) >= 2 && new Set(gaps).size > 1 && slots.some((s) => Math.abs(s) <= 3)) break;
+    }
+    seed = s0;
+    return Object.fromEntries(slots.map((s, i) => [s, kinds[i]]));
+  })();
   const rows = [
     // pitch, size range, rest height range, z range, whether this row has the monsters
     { pitch: 72, s: [228, 252], h: [0, 26], z: [3, 5], monsters: true },
