@@ -432,8 +432,8 @@
 .meet-lolla .ml-city,
 .meet-lolla .ml-crowd {
   --bar-h: 92px;                                    /* the player bar the hands stand on */
-  --crowd-h: calc(250px + var(--bar-h));            /* pinned: hands + bar */
-  --hr: 92px;                                       /* how far a hand rises at full level */
+  --crowd-h: calc(272px + var(--bar-h));            /* pinned: hands + bar */
+  --hr: 76px;                                       /* how far a hand rises at full level */
   --rest-h: 200px;                                  /* a typical raised hand above the bar */
 }
 
@@ -781,12 +781,12 @@
   .meet-lolla .ml-city,
   .meet-lolla .ml-crowd {
     --bar-h: 152px;
-    --crowd-h: calc(196px + var(--bar-h));
-    --hr: 62px;
+    --crowd-h: calc(222px + var(--bar-h));
+    --hr: 52px;
     --rest-h: 160px;
   }
   .meet-lolla .ml-hand {
-    --s: calc(var(--s0) * 0.82);
+    --s: calc(var(--s0) * 0.7);
   }
   .meet-lolla .ml-hand[data-narrow="0"] {
     display: none;

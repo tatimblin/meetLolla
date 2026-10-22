@@ -21,19 +21,49 @@ const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this 
 
 const instances = new WeakMap();
 let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
-// The crowd (positions from src/svg/poster/hands/hands.md): [hand, left %, tilt deg, size px, z,
-// rest height px, kept on narrow screens]. Fixed, irregular positions so the crowd is the same on
-// every load. Most hands are upright; a few lean slightly.
-const CROWD = [
-  ["h1b", 2.0, -6, 98, 2, 26, 1], ["claw", 5.6, 0, 112, 3, 38, 1], ["h2", 10.8, 0, 82, 1, 10, 0],
-  ["h5", 13.4, 0, 100, 2, 32, 1], ["h3b", 16.2, 0, 96, 1, 20, 0], ["h4", 23.8, 0, 104, 2, 42, 1],
-  ["h7", 27.0, 5, 84, 3, 14, 0], ["rock", 31.4, 0, 110, 4, 46, 1], ["h6b", 33.4, 0, 98, 2, 28, 0],
-  ["h1", 38.2, -4, 96, 1, 20, 1], ["h4", 45.8, 0, 98, 2, 36, 1], ["eye", 49.0, 0, 104, 3, 24, 0],
-  ["h2", 51.6, 0, 84, 4, 16, 1], ["h3", 57.2, 0, 100, 2, 40, 1], ["h5", 63.0, 0, 98, 1, 22, 0],
-  ["h7", 65.6, 0, 84, 3, 12, 1], ["h6", 68.4, 6, 100, 2, 34, 0], ["peace", 75.8, 0, 110, 3, 44, 1],
-  ["h1b", 79.6, 0, 96, 2, 26, 1], ["h4", 85.2, 0, 100, 1, 38, 0], ["h3b", 90.8, 0, 98, 2, 24, 1],
-  ["h5", 96.4, -7, 100, 3, 30, 1],
-];
+
+// The crowd, as dense as the poster's: about 38 hands across, shoulder to shoulder, in two rows.
+// The back row is smaller, stands a little higher and sits behind the front row; together the
+// arms make a near-solid wall. Positions, sizes and rest heights are irregular but come from a
+// fixed seed, so the crowd is identical on every load. Rows: [hand, left %, tilt deg, size px,
+// z, rest height px, kept on narrow screens]. About one hand in five leans, 4-7 degrees; about
+// one in eight is a monster, never two side by side.
+const CROWD = (() => {
+  let seed = 20170803;
+  const rnd = () => {   // mulberry32
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const humans = ["h1", "h4", "h2", "h5", "h3b", "h6", "h1b", "h7", "h3", "h6b", "h4", "h5"];
+  const small = new Set(["h2", "h7"]);   // fists read bigger, so draw them a little smaller
+  const rows = [
+    // count, size range, rest height range, z range, monster slots, which to keep on phones
+    { n: 22, s: [150, 170], h: [8, 30], z: [3, 5], monsters: { 2: "claw", 8: "rock", 13: "eye", 19: "peace" }, keep: (i) => i % 3 !== 0 },
+    { n: 16, s: [130, 148], h: [18, 46], z: [1, 2], monsters: { 3: "claw" }, keep: (i) => i % 5 === 2 },
+  ];
+  const out = [];
+  let h = 0;
+  rows.forEach((row, r) => {
+    const pitch = 100 / row.n;
+    for (let i = 0; i < row.n; i++) {
+      const x = clampN((i + 0.5) * pitch + (rnd() - 0.5) * pitch * (r ? 0.7 : 0.55) + (r ? pitch * 0.25 : 0), 1, 99);
+      let kind = row.monsters[i];
+      if (!kind) { kind = humans[h % humans.length]; h += 1 + (rnd() < 0.3 ? 1 : 0); }
+      const lo = row.s[0], hi = row.s[1];
+      let size = lo + rnd() * (hi - lo);
+      if (small.has(kind)) size *= 0.86;
+      if (row.monsters[i]) size *= 1.06;
+      const lean = rnd() < 0.2 ? Math.round((4 + rnd() * 3) * (rnd() < 0.5 ? -1 : 1)) : 0;
+      const h0 = Math.round(row.h[0] + rnd() * (row.h[1] - row.h[0]));
+      const z = row.z[0] + Math.floor(rnd() * (row.z[1] - row.z[0] + 1));
+      out.push([kind, +x.toFixed(1), lean, Math.round(size), z, h0, row.keep(i) ? 1 : 0]);
+    }
+  });
+  return out;
+})();
+function clampN(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
 // hand -> [file under src/, wrist left and right edge, clip line (all in the 300-unit viewBox,
 // measured from the rendered SVGs), arm: skin colour sampled at the wrist or an arm tile, outline
 // width in units]. The arm is exactly as wide as the wrist and centred on it; the hand is clipped
@@ -55,9 +85,9 @@ const HANDS = {
   eye: ["svg/poster/hands/hand-monster-eye.svg", 99, 201, 300, "svg/poster/hands/arm-eye.svg", 0],
   peace: ["svg/poster/hands/hand-monster-peace.svg", 99, 201, 300, "svg/poster/hands/arm-peace.svg", 0],
 };
-// bar -> analyser bin (fftSize 64 gives 32 bins; an mp3 has little above bin 22). Scrambled so
-// the bass doesn't all land on the left of the crowd.
-const BINS = [3, 9, 15, 1, 12, 6, 19, 2, 10, 17, 5, 13, 21, 4, 8, 16, 11, 20, 7, 14, 18, 22];
+// bar -> analyser bin (fftSize 64 gives 32 bins; an mp3 has little above bin 22). Scrambled and
+// repeated across the crowd so the bass does not all land on one side.
+const BINS = CROWD.map((_, i) => 1 + ((i * 7 + 3) % 22));
 
 const bySlug = new Map(artists.map((a) => [a.slug, a]));
 const playable = days.flatMap((d) =>
