@@ -525,13 +525,13 @@
   height: calc(300 * var(--u));
   color: var(--ml-crowd-shadow);
 }
-/* The poster's @lollapalooza placard: held up somewhere in the crowd, not by any one hand.
-   It sits behind the silhouette, which covers its bottom edge, and behind the hands. */
+/* The poster's @lollapalooza placard: resting on top of the crowd silhouette, behind the hands
+   (hands are z 1-6; this follows the silhouette in the markup at z 0). */
 .meet-lolla .ml-sign {
   position: absolute;
   z-index: 0;
   left: 8%;
-  bottom: calc(262 * var(--u));
+  bottom: calc(172 * var(--u));
   padding: calc(4 * var(--u)) calc(26 * var(--u)) calc(14 * var(--u));
   background: #fff;
   color: #ef4a24;
@@ -542,17 +542,6 @@
   white-space: nowrap;
   transform: rotate(-3deg);
   transform-origin: bottom center;
-}
-/* the crowd's silhouette rising under the placard: a mass of raised arms, not one hand */
-.meet-lolla .ml-sign::after {
-  content: "";
-  position: absolute;
-  left: 12%;
-  right: 18%;
-  top: 78%;
-  height: calc(240 * var(--u));
-  border-radius: calc(40 * var(--u)) calc(56 * var(--u)) 0 0;
-  background: var(--ml-crowd-shadow);
 }
 .meet-lolla .ml-crowd-shadow svg {
   display: block;
