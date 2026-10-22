@@ -1,0 +1,47 @@
+name: Publish release to GitHub Pages
+
+# Pages serves the repo exactly as tagged: dist/index.js (the embed), src/audio, src/img and
+# assets/fonts, at https://tatimblin.github.io/meetLolla/. tristantimblin.dev imports the
+# bundle and streams the media from there. Every v* tag deploys; a manual run can redeploy
+# any tag. (jsDelivr can't be used: the repo is over its 50 MB package limit.)
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag to publish, e.g. v0.1.1"
+        required: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Stage the site
+        run: |
+          mkdir -p _site
+          cp -R index.html dist src assets _site/
+          touch _site/.nojekyll
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

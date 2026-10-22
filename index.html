@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>meet Lolla (dev)</title>
+  <title>meet Lolla</title>
   <link rel="icon" type="image/png" href="src/img/favicon/favicon32.png" sizes="32x32">
   <style>
     html, body { margin: 0; height: 100%; }
@@ -11,15 +11,15 @@
   </style>
 </head>
 <body>
-  <!-- Dev page for `bun run dev`: mounts the module into a full-viewport box, the way the site's
+  <!-- Standalone page (GitHub Pages, and `bun run dev`): mounts the module into a full-viewport box, the way the site's
        Embed component does. window.lolla.{mount,destroy} are for poking at it from devtools. -->
   <div id="stage"></div>
   <script type="module">
-    import { mount } from "/dist/index.js";
+    import { mount } from "./dist/index.js";
     const stage = document.getElementById("stage");
-    let handle = mount(stage, { assetBase: "/" });
+    let handle = mount(stage, { assetBase: new URL(".", location.href).href });
     window.lolla = {
-      mount() { handle = mount(stage, { assetBase: "/" }); return handle; },
+      mount() { handle = mount(stage, { assetBase: new URL(".", location.href).href }); return handle; },
       destroy() { handle.destroy(); },
     };
   </script>
