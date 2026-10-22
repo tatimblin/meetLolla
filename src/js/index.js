@@ -85,7 +85,7 @@ const markup = (uid) => `
   <audio class="ml-audio" preload="none" crossorigin="anonymous"></audio>
 </div>
 <footer class="ml-foot">
-  <p class="ml-credit">Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a>, 2017 · a school project, restyled in 2026 after the official poster.</p>
+  <p class="ml-credit">Site by <a href="https://tristantimblin.dev" target="_blank" rel="noopener">Tristan Timblin</a> at <a href="https://drexel.edu/westphal/academics/undergraduate/user-experience/" target="_blank" rel="noopener">Drexel University</a>, original design by <a href="https://www.lollapalooza.com" target="_blank" rel="noopener">Lollapalooza</a></p>
 </footer>`;
 
 const el = (tag, cls, text) => {
