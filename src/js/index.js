@@ -306,11 +306,131 @@ export function mount(host, { assetBase = "" } = {}) {
   }
 
   function markPlaying() {
+    let playing = null;
     for (const b of lineup.querySelectorAll("button.ml-name")) {
       const on = !!current && b.dataset.slug === current.slug;
       b.classList.toggle("ml-is-playing", on);
-      if (on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current");
+      if (on) { b.setAttribute("aria-current", "true"); playing = b; } else b.removeAttribute("aria-current");
     }
+    setDancer(still() ? null : playing);
+  }
+
+  // --- the playing name dances -----------------------------------------------------------
+  // The playing name is split into one span per letter (hidden from assistive tech; the button
+  // keeps the name as its aria-label), each letter driven by its own analyser bin in frame().
+  // The whole word is run through a per-mount SVG filter (turbulence + displacement) whose
+  // strength follows the overall loudness, so loud passages make it wobble a little.
+  const warpId = `ml-warp-${uid}`;
+  root.insertAdjacentHTML("beforeend", `<svg class="ml-defs" aria-hidden="true" focusable="false" width="0" height="0"><filter id="${warpId}" x="-6%" y="-35%" width="112%" height="170%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.03 0.07" numOctaves="1" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`);
+  const turb = root.querySelector(`#${warpId} feTurbulence`);
+  const disp = root.querySelector(`#${warpId} feDisplacementMap`);
+  // Safari renders url() filters on HTML at 1x and smears them when they animate: no warp there.
+  const canWarp = !/^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+  const NAME_SCALE = 1.34;   // keep in step with the CSS scale on .ml-name.ml-is-playing
+  /** @type {null | { b: HTMLElement, name: string, ls: HTMLElement[], bins: number[], env: Float32Array, avg: Float32Array, peak: Float32Array, kick: number, bass: number, loud: number, warp: boolean }} */
+  let dancer = null;
+
+  function setDancer(b) {
+    if (dancer?.b === b) return;
+    if (dancer) {
+      const d = dancer;
+      d.b.textContent = d.name;
+      d.b.removeAttribute("aria-label");
+      d.b.style.removeProperty("filter");
+      d.b.style.removeProperty("transform");
+      d.b.style.removeProperty("transform-origin");
+      dancer = null;
+    }
+    if (!b) return;
+    const name = b.textContent;
+    b.setAttribute("aria-label", name);
+    const ls = [];
+    const frag = document.createDocumentFragment();
+    for (const ch of name) {
+      if (ch === " ") { frag.append(" "); continue; }
+      const s = el("span", "ml-l", ch);
+      s.setAttribute("aria-hidden", "true");
+      frag.append(s);
+      ls.push(s);
+    }
+    b.replaceChildren(frag);
+    // neighbouring letters listen to bins far apart, so the word bounces all over, not in a ramp
+    const bins = ls.map((_, i) => 1 + ((i * 7 + 2) % 17));
+    const n = ls.length;
+    dancer = { b, name, ls, bins, env: new Float32Array(n), avg: new Float32Array(n), peak: new Float32Array(n).fill(0.2),
+      kick: 0, bass: 0, loud: 0, warp: false };
+    placeDancer();
+    if (!audio.paused) startBars();
+  }
+
+  // Grow from the centre, unless that would push the name past the edge of the lineup: then
+  // grow from the side that keeps it inside.
+  function placeDancer() {
+    if (!dancer) return;
+    const b = dancer.b;
+    const L = root.getBoundingClientRect().left + 6, R = L + root.clientWidth - 12;
+    const w = b.offsetWidth;
+    let x0 = b.offsetLeft;
+    for (let p = b.offsetParent; p && p !== root; p = p.offsetParent) x0 += p.offsetLeft;
+    x0 += root.getBoundingClientRect().left;
+    const s = NAME_SCALE * 1.08 - 1;   // plus the loudest kick
+    let o = 0.5;
+    if (x0 - o * w * s < L) o = (x0 - L) / (w * s);
+    if (x0 - o * w * s + w * (1 + s) > R) o = (x0 + w * (1 + s) - R) / (w * s);
+    b.style.transformOrigin = `${(clamp(o, 0, 1) * 100).toFixed(1)}% 60%`;
+  }
+
+  // one frame of the dance; `live` is false while paused, when everything eases back to rest.
+  // Returns whether anything is still moving.
+  function danceFrame(t, live) {
+    const d = dancer;
+    if (!d) return false;
+    let moving = false;
+    for (let i = 0; i < d.ls.length; i++) {
+      const b = d.bins[i];
+      const raw = live ? Math.min(1, (freq[b] / 255) * (1 + b / 20)) : 0;
+      // Each letter reacts to its band rising above its own running average (a hit), scaled
+      // against its own recent peak so quiet bands dance too; a little of the steady level
+      // keeps it bobbing between hits.
+      d.peak[i] = Math.max(raw, d.peak[i] * 0.993, 0.2);
+      const floor = d.avg[i] * 0.95;
+      const hit = clamp((raw - floor) / Math.max(0.18, d.peak[i] - floor), 0, 1);
+      d.avg[i] += (raw - d.avg[i]) * 0.05;
+      const target = 0.7 * hit * hit + 0.3 * (raw / d.peak[i]);
+      const e = d.env[i] += (target - d.env[i]) * (target > d.env[i] ? 0.55 : 0.16);
+      if (e > 0.003) moving = true;
+      const y = -0.22 * e;
+      const r = 7 * e * Math.sin(t * 0.0045 + i * 1.9);
+      const s = 1 + 0.14 * e;
+      d.ls[i].style.transform = `translateY(${y.toFixed(3)}em) rotate(${r.toFixed(2)}deg) scale(${s.toFixed(3)})`;
+    }
+    // the beat: bass jumping above its own slow average kicks the whole word
+    const bass = live ? (freq[1] + freq[2] + freq[3]) / 765 : 0;
+    const onset = Math.max(0, bass - d.bass * 1.04) / Math.max(0.1, d.bass);
+    d.bass += (bass - d.bass) * 0.1;
+    d.kick = Math.max(d.kick * 0.85, Math.min(1, onset * 10));
+    let sum = 0;
+    for (let b = 1; b <= 16; b++) sum += freq[b];
+    const loud = live ? Math.min(1, sum / (16 * 255) * 1.35) : 0;
+    d.loud += (loud - d.loud) * (loud > d.loud ? 0.3 : 0.08);
+    if (d.kick > 0.003 || d.loud > 0.003) moving = true;
+    const sway = 2.2 * d.loud * Math.sin(t * 0.0021);
+    d.b.style.transform = `rotate(${sway.toFixed(2)}deg) scale(${(1 + 0.08 * d.kick).toFixed(3)})`;
+    // the warp: the word always wobbles a little while music plays, liquefies more with the
+    // loudness (squared, so loud passages warp most) and on each kick, up to about a third of
+    // the font size; the noise field drifts
+    // slowly so the wobble never repeats
+    if (canWarp) {
+      const fs = parseFloat(d.b.parentElement?.style.getPropertyValue("--fs")) || 24;
+      const amt = fs * Math.min(0.36, 0.1 * Math.min(1, d.loud * 3) + 0.2 * Math.max(0, d.loud - 0.2) ** 2 / 0.64 + 0.08 * d.kick);
+      const on = amt > 0.05;
+      if (on !== d.warp) { d.warp = on; d.b.style.filter = on ? `url(#${warpId})` : ""; }
+      if (on) {
+        disp.setAttribute("scale", amt.toFixed(2));
+        turb.setAttribute("baseFrequency", `${(0.03 + 0.008 * Math.sin(t * 0.0009)).toFixed(4)} ${(0.07 + 0.015 * Math.sin(t * 0.0013 + 1)).toFixed(4)}`);
+      }
+    }
+    return moving;
   }
 
   // Rows are sized like the poster: one base size for the whole lineup, chosen so the rows fit
@@ -361,6 +481,7 @@ export function mount(host, { assetBase = "" } = {}) {
       if (wrap) breakRow(r, parts[i], k[i], Math.max(2, Math.ceil(fill / 0.97)));
     });
     lineup.style.setProperty("--ml-base", `${base.toFixed(2)}px`);
+    placeDancer();
   }
 
   // Split a row that is too wide into `lines` balanced, centred lines, breaking at bullets
@@ -486,21 +607,24 @@ export function mount(host, { assetBase = "" } = {}) {
     root.classList.toggle("ml-is-playing", playing);
   }
 
-  function frame() {
+  // While paused the loop keeps running only until the playing name has settled.
+  function frame(t) {
     raf = requestAnimationFrame(frame);
     if (!analyser) return;
+    const live = !audio.paused;
     analyser.getByteFrequencyData(freq);
-    for (let i = 0; i < bars.length; i++) {
-      const b = BINS[i];
-      const lvl = Math.min(1, (freq[b] / 255) * (1 + b / 30));
-      bars[i].style.setProperty("--lvl", (lvl * lvl).toFixed(3));
+    if (live) {
+      for (let i = 0; i < bars.length; i++) {
+        const b = BINS[i];
+        const lvl = Math.min(1, (freq[b] / 255) * (1 + b / 30));
+        bars[i].style.setProperty("--lvl", (lvl * lvl).toFixed(3));
+      }
     }
+    if (!danceFrame(t, live) && !live) { cancelAnimationFrame(raf); raf = 0; }
   }
-  // Reduced motion: the crowd stays still.
+  // Reduced motion: the crowd stays still and the playing name only grows.
   function startBars() { if (!raf && !still()) raf = requestAnimationFrame(frame); }
   function stopBars() {
-    cancelAnimationFrame(raf);
-    raf = 0;
     for (const b of bars) b.style.removeProperty("--lvl");
   }
 
@@ -554,7 +678,9 @@ export function mount(host, { assetBase = "" } = {}) {
   audio.addEventListener("loadedmetadata", () => showProgress(audio.currentTime), { signal });
   audio.addEventListener("ended", () => { stopBars(); advance(); }, { signal });
   reduceMotion.addEventListener?.("change", () => {
-    if (still()) stopBars(); else if (!audio.paused) startBars();
+    if (still()) { cancelAnimationFrame(raf); raf = 0; stopBars(); }
+    markPlaying();
+    if (!still() && !audio.paused) startBars();
   }, { signal });
 
   // --- parallax: the root is the scroller; the skyline rises as it scrolls into view -------
