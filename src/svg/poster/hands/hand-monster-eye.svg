@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+<title>Yellow one-eyed open palm</title>
+<g stroke="#1d1d1b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path fill="#F5CF33" d="M124 300L124 262C106 250 94 230 92 206L66 168C58 156 60 146 68 144C76 142 82 148 88 156L104 178L98 96C97 82 102 74 110 74C118 74 123 82 124 96L130 150L132 68C132 54 138 46 146 46C154 46 160 54 160 68L160 150L168 84C170 72 176 66 184 67C192 68 196 76 194 88L186 156L200 116C203 106 210 102 216 105C222 108 222 116 219 126L204 196C202 226 192 246 176 262L176 300Z"/>
+<path fill="none" stroke-width="4" d="M130 150L131 166M160 150L160 164M186 156L182 170M104 178L110 196"/>
+<circle cx="150" cy="208" r="27" fill="#fff"/>
+<circle cx="152" cy="211" r="13" fill="#3FA34D" stroke-width="3"/>
+</g>
+<circle cx="153" cy="212" r="6" fill="#1d1d1b"/>
+<circle cx="146" cy="205" r="3" fill="#fff"/>
+<g fill="#E0A21E">
+<circle cx="110" cy="110" r="4"/><circle cx="146" cy="88" r="5"/><circle cx="180" cy="100" r="4"/><circle cx="208" cy="130" r="3.5"/><circle cx="112" cy="232" r="5"/><circle cx="190" cy="228" r="4"/><circle cx="76" cy="158" r="3.5"/>
+</g>
+<g fill="none" stroke="#1d1d1b" stroke-width="4" stroke-linecap="round"><path d="M128 268q22 10 44 0M128 284q22 10 44 0" stroke="#E0A21E"/></g>
+</svg>

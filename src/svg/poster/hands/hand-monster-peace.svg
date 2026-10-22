@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+<title>Purple spotted peace sign</title>
+<g stroke="#1d1d1b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path fill="#A48BE0" d="M124 300L124 258C108 246 98 226 98 204L100 170L84 70C82 56 88 48 96 46C104 44 110 50 113 62L140 150L166 56C170 44 178 40 186 43C194 46 196 54 193 66L190 140C204 140 211 150 209 162C211 176 207 192 200 200C200 226 192 244 176 258L176 300Z"/>
+<path fill="#fff" stroke-width="4" d="M88 58q8-9 18-3l1 11q-7 5-16 1zM176 50q9-5 16 3l-3 11q-8 3-14-2z"/>
+<path fill="none" stroke-width="4" d="M140 150L150 176M190 140C178 140 168 150 170 168M162 150C150 150 146 162 150 176"/>
+<path fill="#A48BE0" d="M100 198C120 178 160 172 184 178C194 182 192 197 180 199C160 202 130 212 110 224Z"/>
+<path fill="#fff" stroke-width="4" d="M176 180q12-1 13 8q-3 8-12 7z"/>
+<rect x="117" y="262" width="66" height="18" rx="4" fill="#F2D13A"/>
+<rect x="138" y="259" width="24" height="24" rx="2" fill="#fff" stroke-width="4"/>
+<path fill="#F2D13A" stroke-width="3.5" d="M182 268l18 10l-4 6zM182 272l12 18l-6 2z"/>
+</g>
+<g fill="#7A5DC8">
+<ellipse cx="96" cy="88" rx="5" ry="7"/><ellipse cx="104" cy="120" rx="4" ry="6"/><ellipse cx="180" cy="80" rx="5" ry="7"/><ellipse cx="174" cy="112" rx="4" ry="6"/><ellipse cx="120" cy="170" rx="6" ry="5"/><ellipse cx="190" cy="160" rx="5" ry="6"/><ellipse cx="128" cy="236" rx="6" ry="5"/><ellipse cx="166" cy="224" rx="5" ry="6"/><ellipse cx="186" cy="212" rx="4" ry="5"/><ellipse cx="146" cy="244" rx="4" ry="4"/>
+</g>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+<title>Pink furry rock sign</title>
+<g stroke="#1d1d1b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path fill="#D25BC6" d="M124 300L124 262L114 256L120 248L106 240L113 231L100 221L107 212L96 201L103 192L99 180L102 60C102 44 110 36 117 36C125 36 131 44 131 60L132 140C136 130 148 128 154 134C158 128 170 126 176 136L178 74C178 60 184 54 190 54C197 54 203 60 203 74L204 170L212 178L205 187L214 197L205 205L212 215L201 224L206 233L193 242L190 254L176 262L176 300Z"/>
+<path fill="#fff" stroke-width="4" d="M108 50q9-9 18 0l-1 12q-8 4-16 0zM184 66q7-7 14 0l-1 10q-6 3-12 0z"/>
+<path fill="none" stroke-width="4" d="M143 132L142 186M166 134L166 184M132 140C130 160 134 178 142 186"/>
+<path fill="#D25BC6" d="M101 206C120 188 150 182 172 186C182 190 180 204 168 206C148 208 128 216 110 228Z"/>
+<path fill="#fff" stroke-width="4" d="M164 188q12-1 13 8q-3 8-12 7z"/>
+<rect x="114" y="260" width="72" height="26" rx="5" fill="#1d1d1b"/>
+<path fill="#fff" stroke-width="2.5" d="M122 263l6 13l6-13zM140 263l6 13l6-13zM158 263l6 13l6-13zM131 283l6-11l6 11zM149 283l6-11l6 11zM167 283l6-11l6 11z"/>
+<circle cx="134" cy="238" r="10" fill="#fff" stroke-width="4"/>
+<circle cx="164" cy="238" r="10" fill="#fff" stroke-width="4"/>
+</g>
+<g fill="#1d1d1b"><circle cx="136" cy="240" r="4.5"/><circle cx="162" cy="240" r="4.5"/></g>
+<g fill="none" stroke="#8E2C86" stroke-width="4" stroke-linecap="round">
+<path d="M110 80l4 6l4-6M112 110l4 6l4-6M186 92l4 6l4-6M186 122l4 6l4-6M190 150l4 6l4-6M112 150l4 6l4-6M114 180l4 6l4-6M184 218l4 6l4-6M110 240l4 6l4-6M148 146l4 6l4-6M180 196l4 6l4-6"/>
+</g>
+</svg>
