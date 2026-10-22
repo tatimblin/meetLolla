@@ -13,7 +13,7 @@
   --ml-sun: #ffef66;
   --ml-navy: #1a5296;
   --ml-cloud: #fff;
-  --ml-font: "ML Antonio", "Antonio", "Oswald", "Arial Narrow", sans-serif;
+  --ml-font: "ML Yanone", "Yanone Kaffeesatz", "Antonio", "Arial Narrow", sans-serif;
 
   container: meet-lolla / inline-size;
   position: relative;
@@ -350,7 +350,7 @@
   font-weight: 600;
   font-size: var(--fs);
   line-height: 1.22;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
   white-space: nowrap;
 }

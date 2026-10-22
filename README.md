@@ -57,9 +57,9 @@ workflow by hand with its `ref`.
 
 ## Fonts
 
-The poster's lineup type is a tall, condensed all-caps sans. The embed self-hosts the closest
-free match, **Antonio** (The Antonio Project Authors, SIL Open Font License 1.1,
-`assets/fonts/Antonio-OFL.txt`), as a variable font in latin and latin-ext subsets from Google
+The poster's lineup type is FF Prater Sans, a commercial font. The embed self-hosts the closest
+free match, **Yanone Kaffeesatz** (The Yanone Kaffeesatz Project Authors, SIL Open Font License
+1.1, `assets/fonts/YanoneKaffeesatz-OFL.txt`), as a variable font in latin and latin-ext subsets from Google
 Fonts. The Lollapalooza wordmark is the SVG in `src/svg/logo.svg`.
 
 The poster art in `src/svg/poster/` is a flat re-drawing in the style of the official 2017

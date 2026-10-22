@@ -96,9 +96,9 @@ const playable = days.flatMap((d) =>
 const fontFaces = (base) => {
   const src = (f) => `url(${JSON.stringify(base + "assets/fonts/" + f)}) format("woff2")`;
   const face = (f, range) =>
-    `@font-face{font-family:"ML Antonio";src:${src(f)};font-weight:100 700;font-style:normal;font-display:swap;unicode-range:${range}}`;
-  return face("antonio-latin.woff2", "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD")
-    + face("antonio-latin-ext.woff2", "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF");
+    `@font-face{font-family:"ML Yanone";src:${src(f)};font-weight:200 700;font-style:normal;font-display:swap;unicode-range:${range}}`;
+  return face("yanone-kaffeesatz-latin.woff2", "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD")
+    + face("yanone-kaffeesatz-latin-ext.woff2", "U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF");
 };
 
 const speakerSvg = `<svg class="ml-speaker" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9.5h3.6L11.5 5v14l-4.9-4.5H3z" fill="currentColor"/><g class="ml-speaker-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 9.2a4 4 0 0 1 0 5.6"/><path d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/></g><g class="ml-speaker-off" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g></svg>`;
@@ -306,15 +306,19 @@ export function mount(host, { assetBase = "" } = {}) {
     const isAlso = (r) => r.classList.contains("ml-row-also");
     const minFit = Math.min(...rows.filter((r) => !isTop(r) && !isAlso(r)).map((r) => W / k[rows.indexOf(r)]));
     const base = clamp(minFit, W < 520 ? 17 : 18, 34);
+    // on phones a row that only just fits would span edge to edge between centred wrapped rows,
+    // so rows stay at the base size, the top billing stays big, and near-full rows wrap too
+    const narrow = W < 520;
     rows.forEach((r, i) => {
-      let fs = clamp(W / k[i], base, base * 1.18);   // rows may grow a little to fill, like the poster
-      if (isTop(r)) fs = clamp(W / k[i], base * 1.15, base * 1.6);
+      let fs = narrow ? base : clamp(W / k[i], base, base * 1.18);   // rows may grow a little to fill, like the poster
+      if (isTop(r)) fs = narrow ? base * 1.45 : clamp(W / k[i], base * 1.15, base * 1.6);
       if (isAlso(r)) fs = Math.max(15, base * 0.72);
       const fill = (k[i] * fs) / W;
+      const wrap = fill > (narrow && !isAlso(r) ? 0.85 : 1.001);
       r.style.setProperty("--fs", `${fs.toFixed(2)}px`);
-      r.classList.toggle("ml-wrap", fill > 1.001);
-      r.classList.toggle("ml-justify", fill <= 1.001 && fill > 0.8 && !isAlso(r));
-      if (fill > 1.001) breakRow(r, parts[i], k[i], Math.ceil(fill / 0.97));
+      r.classList.toggle("ml-wrap", wrap);
+      r.classList.toggle("ml-justify", !wrap && fill > 0.8 && !isAlso(r));
+      if (wrap) breakRow(r, parts[i], k[i], Math.max(2, Math.ceil(fill / 0.97)));
     });
     lineup.style.setProperty("--ml-base", `${base.toFixed(2)}px`);
   }
@@ -528,7 +532,7 @@ export function mount(host, { assetBase = "" } = {}) {
   const ro = new ResizeObserver(() => { fit(); if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); });
   ro.observe(lineup);
   // Row widths depend on the font: refit once it has loaded.
-  document.fonts?.load('600 20px "ML Antonio"').then(() => { if (!destroyed) fit(); }, () => {});
+  document.fonts?.load('600 20px "ML Yanone"').then(() => { if (!destroyed) fit(); }, () => {});
 
   fitNow();
   applyScroll();
