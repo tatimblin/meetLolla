@@ -1,4 +1,4 @@
-// bun run dev [port]: serves the repo root (index.html, src/audio, src/img, assets/fonts) on
+// bun run dev [port]: serves the repo root (index.html, src/, assets/fonts) on
 // port 4471 and rebuilds /dist/index.js from source on every request, so edits show on reload
 // without touching the committed dist/.
 import { join, resolve } from "node:path";
@@ -25,8 +25,22 @@ Bun.serve({
     if (!path.startsWith("/") || path.includes("..") || !(await file.exists())) {
       return new Response("not found", { status: 404 });
     }
-    // Bun.file responses honour Range requests, which <audio> seeking needs.
-    return new Response(file, { headers });
+    // <audio> seeking needs Range support (GitHub Pages has it; a plain Bun.file response here
+    // answers 200 with the whole file, which makes the clip unseekable).
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get("range") ?? "");
+    if (range && (range[1] || range[2])) {
+      const size = file.size;
+      const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+      const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+      if (start > end || start >= size) {
+        return new Response(null, { status: 416, headers: { ...headers, "Content-Range": `bytes */${size}` } });
+      }
+      return new Response(file.slice(start, end + 1), {
+        status: 206,
+        headers: { ...headers, "Accept-Ranges": "bytes", "Content-Range": `bytes ${start}-${end}/${size}`, "Content-Type": file.type },
+      });
+    }
+    return new Response(file, { headers: { ...headers, "Accept-Ranges": "bytes" } });
   },
 });
 console.log(`http://localhost:${port}/`);

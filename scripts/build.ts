@@ -1,6 +1,6 @@
 // bun run build: bundles src/js/index.js (its mount()) into dist/index.js, one minified ESM file
 // with the CSS and SVGs inlined as strings. Fonts and media are NOT bundled: mount() loads them
-// from `assetBase` (assets/fonts/, src/audio/, src/img/), so dist/ is a single file.
+// from `assetBase` (assets/fonts/, src/audio/, src/svg/poster/hands/), so dist/ is a single file.
 //
 // Reproducible: pinned svgo (bun.lock) and Bun's bundler; the same sources give the same bytes.
 import { rm, mkdir, stat } from "node:fs/promises";
