@@ -50,10 +50,10 @@ const HANDS = {
   h6: ["img/hand6.svg", 145, 193.5, 300, "#c66e34", 1],
   h6b: ["svg/poster/hands/hand6-band.svg", 145, 193.5, 300, "#c66e34", 1],
   h7: ["img/hand7.svg", 119, 189.5, 300, "#e3937c", 1],
-  claw: ["svg/poster/hands/hand-monster-claw.svg", 121.5, 178, 296, "svg/poster/hands/arm-claw.svg", 0],
-  rock: ["svg/poster/hands/hand-monster-rock.svg", 121.5, 178, 296, "svg/poster/hands/arm-rock.svg", 0],
-  eye: ["svg/poster/hands/hand-monster-eye.svg", 121.5, 178, 296, "svg/poster/hands/arm-eye.svg", 0],
-  peace: ["svg/poster/hands/hand-monster-peace.svg", 121.5, 178, 296, "svg/poster/hands/arm-peace.svg", 0],
+  claw: ["svg/poster/hands/hand-monster-claw.svg", 99, 201, 300, "svg/poster/hands/arm-claw.svg", 0],
+  rock: ["svg/poster/hands/hand-monster-rock.svg", 99, 201, 300, "svg/poster/hands/arm-rock.svg", 0],
+  eye: ["svg/poster/hands/hand-monster-eye.svg", 99, 201, 300, "svg/poster/hands/arm-eye.svg", 0],
+  peace: ["svg/poster/hands/hand-monster-peace.svg", 99, 201, 300, "svg/poster/hands/arm-peace.svg", 0],
 };
 // bar -> analyser bin (fftSize 64 gives 32 bins; an mp3 has little above bin 22). Scrambled so
 // the bass doesn't all land on the left of the crowd.
