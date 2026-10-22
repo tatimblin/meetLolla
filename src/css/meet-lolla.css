@@ -144,15 +144,18 @@
 .meet-lolla .ml-info {
   display: contents;
 }
+/* Date and place sit low, inside the white of the cloud bank, like the poster. */
 .meet-lolla .ml-when {
   grid-area: when;
   text-align: center;
   justify-self: start;
+  align-self: end;
 }
 .meet-lolla .ml-where {
   grid-area: where;
   text-align: center;
   justify-self: end;
+  align-self: end;
 }
 .meet-lolla .ml-when > span,
 .meet-lolla .ml-where > span {
