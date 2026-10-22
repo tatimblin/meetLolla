@@ -17,8 +17,8 @@ handle.destroy();                          // idempotent; removes DOM, listeners
 ```
 
 - `assetBase` is the repo root as published, ending in `/`. Media is loaded from it as-is:
-  `src/audio/<slug>.mp3`, the crowd's hands (`src/img/hand*.svg`, `src/svg/poster/hands/`) and
-  `assets/fonts/`. Nothing is hard-coded to a host.
+  `src/audio/<slug>.mp3`, the crowd's hands (`src/svg/poster/hands/`) and `assets/fonts/`.
+  Nothing is hard-coded to a host.
 - All DOM and CSS live under one `.meet-lolla` root inside `el` (the `<style>` is inside the root
   and goes away on `destroy()`). Keyframes and ids are `ml-` prefixed; nothing is fixed to the
   viewport, so it survives client-side navigations that mount/destroy repeatedly.
@@ -30,15 +30,15 @@ handle.destroy();                          // idempotent; removes DOM, listeners
 ```sh
 bun install
 bun run dev      # http://localhost:4471/ - index.html mounts it full-viewport; rebuilds per request
-bun test         # every artist's audio file exists, no duplicates, valid dates/links
+bun test         # lineup and artist data: clips exist, no duplicates, days/links valid; the crowd
 bun run build    # dist/index.js: one minified ESM file with the CSS and SVGs inlined
 ```
 
 Source: `src/js/index.js` (mount), `src/js/lineup.js` (the poster's lineup by day and billing
-row), `src/js/artists.js` (clips and YouTube links), `src/css/meet-lolla.css`, `src/svg/*.svg`
-and `src/svg/poster/*.svg` (svgo runs at build time; the crowd recipe is
-`src/svg/poster/hands/hands.md`). The build is reproducible: same sources and `bun.lock`, same
-bytes.
+row), `src/js/artists.js` (clips and YouTube links), `src/js/crowd.js` (the crowd of hands),
+`src/css/meet-lolla.css`, `src/svg/*.svg` and `src/svg/poster/*.svg` (svgo runs at build time).
+The hands in `src/svg/poster/hands/` are loaded by URL; `hands.md` there describes them. The
+build is reproducible: same sources and `bun.lock`, same bytes.
 
 ## Release
 
@@ -59,8 +59,8 @@ workflow by hand with its `ref`.
 
 The poster's lineup type is FF Prater Sans, a commercial font. The embed self-hosts the closest
 free match, **Yanone Kaffeesatz** (The Yanone Kaffeesatz Project Authors, SIL Open Font License
-1.1, `assets/fonts/YanoneKaffeesatz-OFL.txt`), as a variable font in latin and latin-ext subsets from Google
-Fonts. The Lollapalooza wordmark is the SVG in `src/svg/logo.svg`.
+1.1, `assets/fonts/YanoneKaffeesatz-OFL.txt`), as a variable font in latin and latin-ext
+subsets from Google Fonts. The Lollapalooza wordmark is the SVG in `src/svg/logo.svg`.
 
 The poster art in `src/svg/poster/` is a flat re-drawing in the style of the official 2017
 admat; the admat itself is not included. The song previews in `src/audio/` belong to their

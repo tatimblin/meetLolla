@@ -1,4 +1,4 @@
-// bun run dev [port]: serves the repo root (index.html, src/audio, src/img, assets/fonts) on
+// bun run dev [port]: serves the repo root (index.html, src/, assets/fonts) on
 // port 4471 and rebuilds /dist/index.js from source on every request, so edits show on reload
 // without touching the committed dist/.
 import { join, resolve } from "node:path";

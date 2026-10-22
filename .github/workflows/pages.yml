@@ -1,7 +1,7 @@
 name: Publish release to GitHub Pages
 
-# Pages serves the repo exactly as tagged: dist/index.js (the embed), src/audio, src/img and
-# assets/fonts, at https://tatimblin.github.io/meetLolla/. tristantimblin.dev imports the
+# Pages serves the repo exactly as tagged: dist/index.js (the embed), src/ (audio, hands, img)
+# and assets/fonts, at https://tatimblin.github.io/meetLolla/. tristantimblin.dev imports the
 # bundle and streams the media from there. Every v* tag deploys; a manual run can redeploy
 # any tag. (jsDelivr can't be used: the repo is over its 50 MB package limit.)
 on:
