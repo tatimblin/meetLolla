@@ -8,14 +8,14 @@ meetlolla.com; now packaged as an embeddable ES module.
 ## Embed
 
 ```js
-const assetBase = "https://cdn.jsdelivr.net/gh/tatimblin/meetLolla@v0.1.0/";
+const assetBase = "https://tatimblin.github.io/meetLolla/";
 const { mount } = await import(`${assetBase}dist/index.js`);
 const handle = mount(el, { assetBase });   // el: a full-size box; meet Lolla fills and scrolls inside it
 // later
 handle.destroy();                          // idempotent; removes DOM, listeners, audio, AudioContext
 ```
 
-- `assetBase` is the repo root at a tag, ending in `/`. Media is loaded from it as-is:
+- `assetBase` is the repo root as published, ending in `/`. Media is loaded from it as-is:
   `src/audio/<slug>.mp3`, `src/img/...`, `assets/fonts/...`. Nothing is hard-coded to a host.
 - All DOM and CSS live under one `.meet-lolla` root inside `el` (the `<style>` is inside the root
   and goes away on `destroy()`). Keyframes and ids are `ml-` prefixed; nothing is fixed to the
@@ -38,15 +38,18 @@ Source: `src/js/index.js` (mount), `src/js/artists.js` (lineup data), `src/css/m
 
 ## Release
 
-jsDelivr serves only what is committed at a tag, so `dist/index.js` is committed.
+GitHub Pages publishes the repo as tagged (`.github/workflows/pages.yml`, on every `v*` tag):
+`index.html` (a standalone full-page copy), `dist/`, `src/` and `assets/` at
+https://tatimblin.github.io/meetLolla/. `dist/index.js` is committed so the tag carries it.
+(jsDelivr is not an option: the repo is over its 50 MB package limit and it intermittently 403s.)
 
 1. Bump `version` in `package.json`.
 2. `bun run build` and commit `dist/` with the bump.
-3. `git tag -a vX.Y.Z -m "vX.Y.Z"` and `git push origin vX.Y.Z`.
+3. `git tag -a vX.Y.Z -m "vX.Y.Z"` and `git push origin vX.Y.Z` (deploys Pages).
 4. `gh release create vX.Y.Z --generate-notes`.
 
-Never move or re-use a tag: jsDelivr caches tagged files permanently. Fix forward with a new
-version.
+Never move or re-use a tag; fix forward with a new version. To redeploy an older tag, run the
+workflow by hand with its `ref`.
 
 ## Fonts
 

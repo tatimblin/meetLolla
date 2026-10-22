@@ -87,7 +87,7 @@ const markup = (base) => `
 /**
  * @param {HTMLElement} el  a full-size box; meet Lolla fills it and scrolls inside it
  * @param {{ assetBase?: string }} opts  repo root ending in "/", e.g.
- *   https://cdn.jsdelivr.net/gh/tatimblin/meetLolla@v0.1.0/ ; media is ${assetBase}src/...
+ *   https://tatimblin.github.io/meetLolla/ ; media is ${assetBase}src/...
  * @returns {{ destroy(): void }}
  */
 export function mount(el, { assetBase = "" } = {}) {
