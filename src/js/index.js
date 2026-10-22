@@ -29,7 +29,7 @@ let seq = 0;   // per-mount id suffix, so two instances on one page never share 
 // and rest heights are irregular but come from a fixed seed, so the crowd is identical on every
 // load. Rows: [hand, x from the page centre, tilt deg, size, z, rest height]; x, size and rest
 // height are in reference px, scaled by --u. About one human hand in eight leans, 3-5 degrees;
-// monsters never lean, and about one hand in six is a monster, never two side by side.
+// monsters never lean, and each of the four appears once.
 const CROWD = (() => {
   let seed = 20170803;
   const rnd = () => {   // mulberry32
@@ -43,13 +43,14 @@ const CROWD = (() => {
   const small = new Set(["h2", "h7"]);   // fists read bigger, so draw them a little smaller
   // A strip much wider than any screen, centred on the page: a screen shows the middle of it
   // and hands load in or drop out at the edges as it resizes (see sizeCrowd). Pitch is in
-  // reference px; monsters come every few hands in the front row, cycling, never side by side.
+  // reference px. Each monster appears once, in the front row near the middle, five hands
+  // apart: a desktop shows all four, a phone the two in the centre (rock and peace).
   const HALF = 2400;
-  const cycle = ["rock", "eye", "peace", "claw"];
+  const MONSTERS = { [-7]: "claw", [-2]: "rock", 3: "peace", 8: "eye" };   // slot from the middle -> monster
   const rows = [
-    // pitch, size range, rest height range, z range, a monster every n (offset), back row: claws only
-    { pitch: 72, s: [228, 252], h: [0, 26], z: [3, 5], every: 5, off: 2 },
-    { pitch: 103, s: [206, 228], h: [24, 62], z: [1, 2], every: 14, off: 6, only: "claw" },
+    // pitch, size range, rest height range, z range, whether this row has the monsters
+    { pitch: 72, s: [228, 252], h: [0, 26], z: [3, 5], monsters: true },
+    { pitch: 103, s: [206, 228], h: [24, 62], z: [1, 2], monsters: false },
   ];
   const out = [];
   let h = 0;
@@ -59,9 +60,7 @@ const CROWD = (() => {
     const mid = Math.floor(n / 2);
     for (let i = 0; i < n; i++) {
       const x = -HALF + (i + 0.5) * pitch + (rnd() - 0.5) * pitch * (r ? 0.7 : 0.55) + (r ? pitch * 0.25 : 0);
-      // monster slots count from the middle, so the centre looks the same at any width
-      const slot = i - mid - row.off;
-      const monster = slot % row.every === 0 ? row.only ?? cycle[((slot / row.every) % 4 + 4) % 4] : null;
+      const monster = (row.monsters && MONSTERS[i - mid]) || null;
       let kind = monster;
       if (!kind) { kind = humans[h % humans.length]; h += 1 + (rnd() < 0.3 ? 1 : 0); }
       const lo = row.s[0], hi = row.s[1];
