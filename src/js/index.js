@@ -136,7 +136,8 @@ const fontFaces = (base) => {
 };
 
 const speakerSvg = `<svg class="ml-speaker" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9.5h3.6L11.5 5v14l-4.9-4.5H3z" fill="currentColor"/><g class="ml-speaker-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 9.2a4 4 0 0 1 0 5.6"/><path d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/></g><g class="ml-speaker-off" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15.5 9.5l5 5M20.5 9.5l-5 5"/></g></svg>`;
-const shuffleSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c4.5 0 6.5 10 11 10H21"/><path d="M3 17h3.5c1.8 0 3-1.6 4.1-3.5M13.4 10.5C14.5 8.6 15.7 7 17.5 7H21"/><path d="M18.5 4.5L21 7l-2.5 2.5M18.5 14.5L21 17l-2.5 2.5"/></svg>`;
+const youtubeSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M6.5 5.5h11a4 4 0 0 1 4 4v5a4 4 0 0 1-4 4h-11a4 4 0 0 1-4-4v-5a4 4 0 0 1 4-4zM10 8.8v6.4l5.4-3.2z"/></svg>`;
+const shuffleSvg =`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h3.5c4.5 0 6.5 10 11 10H21"/><path d="M3 17h3.5c1.8 0 3-1.6 4.1-3.5M13.4 10.5C14.5 8.6 15.7 7 17.5 7H21"/><path d="M18.5 4.5L21 7l-2.5 2.5M18.5 14.5L21 17l-2.5 2.5"/></svg>`;
 const playSvg = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="ml-icon-play" d="M8 5.5v13l10.5-6.5z" fill="currentColor"/><g class="ml-icon-pause" fill="currentColor"><rect x="6.5" y="5.5" width="4" height="13" rx="1"/><rect x="13.5" y="5.5" width="4" height="13" rx="1"/></g></svg>`;
 const star =`<span class="ml-star" aria-hidden="true">★</span>`;
 
@@ -176,7 +177,7 @@ const markup = (uid) => `
       </div>
     </div>
     <div class="ml-extras">
-      <a class="ml-youtube" target="_blank" rel="noopener" hidden>Full song on YouTube</a>
+      <a class="ml-youtube" target="_blank" rel="noopener" aria-label="Full song on YouTube" title="Full song on YouTube" hidden>${youtubeSvg}</a>
       <button type="button" class="ml-mute" aria-label="Mute" aria-pressed="false">${speakerSvg}</button>
     </div>
   </div>
@@ -409,6 +410,7 @@ export function mount(host, { assetBase = "" } = {}) {
     if (info) {
       linkEl.href = info.link;
       linkEl.setAttribute("aria-label", `Full song by ${entry.name} on YouTube`);
+      linkEl.title = `Full song by ${entry.name} on YouTube`;
       linkEl.hidden = false;
     }
     progress.tabIndex = 0;

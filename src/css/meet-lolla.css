@@ -760,18 +760,24 @@
   align-items: center;
   gap: 16px;
 }
+/* The full song on YouTube: an icon button, a pair with the mute button. */
 .meet-lolla .ml-youtube {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.04em;
-  text-decoration: underline;
-  text-decoration-color: var(--ml-sun);
-  text-underline-offset: 3px;
-  white-space: nowrap;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+.meet-lolla .ml-youtube svg {
+  width: 24px;
+  height: 24px;
 }
 .meet-lolla .ml-youtube:hover {
   color: var(--ml-sun);
+  box-shadow: inset 0 0 0 2px var(--ml-sun);
 }
 /* The credit isn't part of the pinned bar: it sits in the page flow after the sticky crowd,
    so the bar rides up off it only once the page is scrolled to the very end. */
@@ -902,9 +908,6 @@
   .meet-lolla .ml-extras {
     justify-content: flex-end;
     gap: 12px;
-  }
-  .meet-lolla .ml-youtube {
-    font-size: 13px;
   }
   .meet-lolla .ml-shuffle {
     font-size: 17px;
