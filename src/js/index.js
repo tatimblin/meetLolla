@@ -16,112 +16,13 @@ import skylineFrontSvg from "../svg/poster/skyline-front.svg";
 import crowdShadowSvg from "../svg/poster/crowd-shadow.svg";
 import { artists } from "./artists.js";
 import { days } from "./lineup.js";
+import { CROWD, HANDS, BINS } from "./crowd.js";
 
 const PREVIEW_S = 30;   // each preview plays for up to 30s, then the next artist
 const USER_SCROLL_QUIET_MS = 4_000;   // auto-advance never scrolls within this long of the user scrolling
 
 const instances = new WeakMap();
 let seq = 0;   // per-mount id suffix, so two instances on one page never share ids
-
-// The crowd, as dense as the poster's: big hands packed edge to edge and overlapping, in two
-// rows, mostly just hand and wristband with the arms cut off low. The back row is a little
-// smaller and stands a little higher; the crowd shadow fills in behind them. Positions, sizes
-// and rest heights are irregular but come from a fixed seed, so the crowd is identical on every
-// load. Rows: [hand, x from the page centre, tilt deg, size, z, rest height]; x, size and rest
-// height are in reference px, scaled by --u. About one human hand in eight leans, 3-5 degrees;
-// monsters never lean, and each of the four appears once.
-const CROWD = (() => {
-  let seed = 20170803;
-  const rnd = () => {   // mulberry32
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-  // fists, peace and rock signs dominate, as in the poster; an open palm now and then
-  const humans = ["h2", "h1", "h3b", "h7", "h6", "h1b", "h4", "h2", "h3", "h6b", "h7", "h1", "h5"];
-  const small = new Set(["h2", "h7"]);   // fists read bigger, so draw them a little smaller
-  // A strip much wider than any screen, centred on the page: a screen shows the middle of it
-  // and hands load in or drop out at the edges as it resizes (see sizeCrowd). Pitch is in
-  // reference px. Each monster appears exactly once, in the front row within nine hands of the
-  // middle, at seeded random slots (the same on every load) with irregular gaps, never side by
-  // side, in a shuffled order; one stands within three hands of the middle so a phone shows it.
-  // The draw is made off a copy of the seed, so the rest of the crowd keeps its own draws.
-  const HALF = 2400;
-  const MONSTERS = (() => {   // slot from the middle -> monster
-    const s0 = seed;
-    const kinds = ["claw", "rock", "peace", "eye"];
-    for (let i = kinds.length - 1; i > 0; i--) {
-      const j = Math.floor(rnd() * (i + 1));
-      [kinds[i], kinds[j]] = [kinds[j], kinds[i]];
-    }
-    let slots;
-    for (;;) {
-      const pick = new Set();
-      while (pick.size < 4) pick.add(Math.floor(rnd() * 19) - 9);
-      slots = [...pick].sort((a, b) => a - b);
-      const gaps = slots.slice(1).map((s, i) => s - slots[i]);
-      if (Math.min(...gaps) >= 2 && new Set(gaps).size > 1 && slots.some((s) => Math.abs(s) <= 3)) break;
-    }
-    seed = s0;
-    return Object.fromEntries(slots.map((s, i) => [s, kinds[i]]));
-  })();
-  const rows = [
-    // pitch, size range, rest height range, z range, whether this row has the monsters
-    { pitch: 72, s: [228, 252], h: [0, 26], z: [3, 5], monsters: true },
-    { pitch: 103, s: [206, 228], h: [24, 62], z: [1, 2], monsters: false },
-  ];
-  const out = [];
-  let h = 0;
-  rows.forEach((row, r) => {
-    const { pitch } = row;
-    const n = Math.ceil((2 * HALF) / pitch);
-    const mid = Math.floor(n / 2);
-    for (let i = 0; i < n; i++) {
-      const x = -HALF + (i + 0.5) * pitch + (rnd() - 0.5) * pitch * (r ? 0.7 : 0.55) + (r ? pitch * 0.25 : 0);
-      const monster = (row.monsters && MONSTERS[i - mid]) || null;
-      let kind = monster;
-      if (!kind) { kind = humans[h % humans.length]; h += 1 + (rnd() < 0.3 ? 1 : 0); }
-      const lo = row.s[0], hi = row.s[1];
-      let size = lo + rnd() * (hi - lo);
-      if (small.has(kind)) size *= 0.86;
-      if (monster) size *= 1.06;
-      const leans = rnd() < 0.09 && !monster;
-      const lean = leans ? Math.round((3 + rnd() * 2) * (rnd() < 0.5 ? -1 : 1)) : 0;
-      const h0 = Math.round(row.h[0] + rnd() * (row.h[1] - row.h[0]));
-      // front-row monsters stand in front of their neighbours, as in the poster
-      const z = monster && !r ? 6 : row.z[0] + Math.floor(rnd() * (row.z[1] - row.z[0] + 1));
-      out.push([kind, +x.toFixed(1), lean, Math.round(size), z, h0]);
-    }
-  });
-  return out;
-})();
-// hand -> [file under src/, wrist left and right outer edge, clip line (all in the 300-unit
-// viewBox, measured from the rendered SVGs), arm: skin colour sampled at the wrist or an arm tile,
-// outline width in units]. The human hands are src/img's hands redrawn at the poster's line weight
-// (4.2 units, about 8% of the wrist width, as in the poster); their wrist edges are the outer
-// edges of that stroke. The arm is exactly as wide as the wrist and centred on it, with the same
-// outline down its sides; the hand is clipped at the clip line (below it some hands draw a
-// closing stroke) and overlaps the arm by 2 units, so hand and arm read as one limb.
-const HANDS = {
-  h1: ["svg/poster/hands/hand1.svg", 117.15, 177.35, 290.5, "#ec9683", 4.2],
-  h1b: ["svg/poster/hands/hand1-band.svg", 117.15, 177.35, 290.5, "#ec9683", 4.2],
-  h2: ["svg/poster/hands/hand2.svg", 117.4, 191.1, 296.5, "#c66e34", 4.2],
-  h3: ["svg/poster/hands/hand3.svg", 143.4, 195.1, 296.5, "#e3937c", 4.2],
-  h3b: ["svg/poster/hands/hand3-band.svg", 143.4, 195.1, 296.5, "#e3937c", 4.2],
-  h4: ["svg/poster/hands/hand4.svg", 109.4, 165.1, 296.5, "#f6ba98", 4.2],
-  h5: ["svg/poster/hands/hand5.svg", 109.4, 165.1, 296.5, "#c66e34", 4.2],
-  h6: ["svg/poster/hands/hand6.svg", 143.4, 195.1, 296.5, "#c66e34", 4.2],
-  h6b: ["svg/poster/hands/hand6-band.svg", 143.4, 195.1, 296.5, "#c66e34", 4.2],
-  h7: ["svg/poster/hands/hand7.svg", 117.4, 191.1, 296.5, "#e3937c", 4.2],
-  claw: ["svg/poster/hands/hand-monster-claw.svg", 99, 201, 300, "svg/poster/hands/arm-claw.svg", 0],
-  rock: ["svg/poster/hands/hand-monster-rock.svg", 99, 201, 300, "svg/poster/hands/arm-rock.svg", 0],
-  eye: ["svg/poster/hands/hand-monster-eye.svg", 99, 201, 300, "svg/poster/hands/arm-eye.svg", 0],
-  peace: ["svg/poster/hands/hand-monster-peace.svg", 99, 201, 300, "svg/poster/hands/arm-peace.svg", 0],
-};
-// bar -> analyser bin (fftSize 64 gives 32 bins; an mp3 has little above bin 22). Scrambled and
-// repeated across the crowd so the bass does not all land on one side.
-const BINS = CROWD.map((_, i) => 1 + ((i * 7 + 3) % 22));
 
 const bySlug = new Map(artists.map((a) => [a.slug, a]));
 const playable = days.flatMap((d) =>
@@ -368,11 +269,12 @@ export function mount(host, { assetBase = "" } = {}) {
   function placeDancer() {
     if (!dancer) return;
     const b = dancer.b;
-    const L = root.getBoundingClientRect().left + 6, R = L + root.clientWidth - 12;
+    // layout offsets, not the bounding box: the playing name is already scaled
+    const left = root.getBoundingClientRect().left;
+    const L = left + 6, R = L + root.clientWidth - 12;
     const w = b.offsetWidth;
-    let x0 = b.offsetLeft;
+    let x0 = left + b.offsetLeft;
     for (let p = b.offsetParent; p && p !== root; p = p.offsetParent) x0 += p.offsetLeft;
-    x0 += root.getBoundingClientRect().left;
     const s = NAME_SCALE * 1.08 - 1;   // plus the loudest kick
     let o = 0.5;
     if (x0 - o * w * s < L) o = (x0 - L) / (w * s);
@@ -418,8 +320,7 @@ export function mount(host, { assetBase = "" } = {}) {
     d.b.style.transform = `rotate(${sway.toFixed(2)}deg) scale(${(1 + 0.08 * d.kick).toFixed(3)})`;
     // the warp: the word always wobbles a little while music plays, liquefies more with the
     // loudness (squared, so loud passages warp most) and on each kick, up to about a third of
-    // the font size; the noise field drifts
-    // slowly so the wobble never repeats
+    // the font size; the noise field drifts slowly so the wobble never repeats
     if (canWarp) {
       const fs = parseFloat(d.b.parentElement?.style.getPropertyValue("--fs")) || 24;
       const amt = fs * Math.min(0.36, 0.1 * Math.min(1, d.loud * 3) + 0.2 * Math.max(0, d.loud - 0.2) ** 2 / 0.64 + 0.08 * d.kick);
@@ -460,11 +361,11 @@ export function mount(host, { assetBase = "" } = {}) {
     lineup.classList.remove("ml-measuring");
     const isTop = (r) => r.classList.contains("ml-row-top");
     const isAlso = (r) => r.classList.contains("ml-row-also");
-    const minFit = Math.min(...rows.filter((r) => !isTop(r) && !isAlso(r)).map((r) => W / k[rows.indexOf(r)]));
-    const base = clamp(minFit, W < 520 ? 17 : 18, 34);
     // on phones a row that only just fits would span edge to edge between centred wrapped rows,
     // so rows stay at the base size, the top billing stays big, and near-full rows wrap too
     const narrow = W < 520;
+    const minFit = Math.min(...rows.map((r, i) => (isTop(r) || isAlso(r) ? Infinity : W / k[i])));
+    const base = clamp(minFit, narrow ? 17 : 18, 34);
     rows.forEach((r, i) => {
       // rows grow to fill, like the poster, whose undercard caps run 18-24px at 792 wide
       // a day's last row grows less and is centred unless it nearly fills the width; the
@@ -690,9 +591,10 @@ export function mount(host, { assetBase = "" } = {}) {
     const p = clamp((view - city.offsetTop) / city.offsetHeight, 0, 1);
     city.style.setProperty("--ml-p", p.toFixed(4));
   }
+  const queueScroll = () => { if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); };
   const onScroll = () => {
     if (performance.now() > ownScrollUntil) lastUserScroll = performance.now();
-    if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll);
+    queueScroll();
   };
   root.addEventListener("scroll", onScroll, { passive: true, signal });
 
@@ -711,7 +613,7 @@ export function mount(host, { assetBase = "" } = {}) {
     CROWD.forEach((c, i) => { bars[i].hidden = Math.abs(c[1]) > half; });
   }
 
-  const ro = new ResizeObserver(() => { fit(); sizeCrowd(); if (!scrollRaf) scrollRaf = requestAnimationFrame(applyScroll); });
+  const ro = new ResizeObserver(() => { fit(); sizeCrowd(); queueScroll(); });
   ro.observe(lineup);
   ro.observe(root);
   sizeCrowd();
